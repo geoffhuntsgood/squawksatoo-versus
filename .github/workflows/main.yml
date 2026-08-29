@@ -1,0 +1,19 @@
+name: NPM Build/Lint/Test
+
+permissions:
+  contents: read
+
+on: push
+
+jobs:
+  build_lint_test:
+    name: Build, Lint, and Test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - run: |
+          npm ci
+          npx playwright install
+          npm run build
+          npm run lint
+          npm run coverage
