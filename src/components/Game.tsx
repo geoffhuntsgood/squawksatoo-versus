@@ -3,41 +3,35 @@ import random from "random";
 import { useEffect, useState, type Dispatch, type SetStateAction } from "react";
 import { useStopwatch } from "react-timer-hook";
 import type { Socket } from "socket.io-client";
-import type { DK64Item, GameOptions } from "../classes";
+import type { DK64Item, DKBBanana, GameOptions } from "../classes";
 import { DK64Category } from "../enums";
 import { DKButton, DKDialog, DKHR, DKItemRow } from "../inputs";
-import { getKongColorInfo } from "../utils/levelApi";
-import type { LastGot } from "../utils/types";
+import type { LastCollected } from "../utils/types";
 import { GameHeader } from "./GameHeader";
 
-export const DK64Game = ({
+export const Game = ({
   options,
   setOptions,
   setStart,
-  isConnected,
   socket,
-  lastGot,
+  lastCollected,
   playerName,
   roomName
 }: {
   options: GameOptions;
   setOptions: Dispatch<SetStateAction<GameOptions | null>>;
   setStart: Dispatch<SetStateAction<boolean>>;
-  isConnected: boolean;
   socket: Socket;
-  lastGot: LastGot | null;
+  lastCollected: LastCollected | null;
   playerName: string;
   roomName: string;
 }) => {
   const [reconfigOpen, setReconfigOpen] = useState(false);
-  const [available, setAvailable] = useState<DK64Item[]>([]);
-  const [displayed, setDisplayed] = useState<DK64Item[]>([]);
-  const [completed, setCompleted] = useState<DK64Item[]>([]);
-  const [total] = useState(
-    options.autoRefresh ? options.dk64Total : options.count
-  );
+  const [available, setAvailable] = useState<(DK64Item | DKBBanana)[]>([]);
+  const [displayed, setDisplayed] = useState<(DK64Item | DKBBanana)[]>([]);
+  const [completed, setCompleted] = useState<(DK64Item | DKBBanana)[]>([]);
 
-  const stopwatch = useStopwatch({ autoStart: true, interval: 20 });
+  const stopwatch = useStopwatch({ interval: 20 });
 
   const replaceItem = (displayIndex: number) => {
     const notCompleted = [...available];
@@ -52,17 +46,18 @@ export const DK64Game = ({
     }
   };
 
-  const onComplete = (item: DK64Item, index: number, emit: boolean) => {
+  const onComplete = (
+    item: DK64Item | DKBBanana,
+    index: number,
+    emit: boolean
+  ) => {
     const done = [...completed];
     done.push(item);
     setCompleted(done);
+    replaceItem(index);
 
-    if (options.autoRefresh) {
-      replaceItem(index);
-    }
-
-    if (isConnected && emit) {
-      socket.emit("item_get", item, index, playerName, roomName);
+    if (emit) {
+      socket.emit("collected_client", item, index, playerName, roomName);
     }
   };
 
@@ -71,40 +66,35 @@ export const DK64Game = ({
     setStart(false);
   };
 
-  const pauseResume = (emit: boolean) => {
-    if (stopwatch.isRunning) {
-      stopwatch.pause();
-    } else {
-      stopwatch.start();
-    }
-
+  const pause = (emit: boolean) => {
+    stopwatch.pause();
     if (emit) {
-      socket.emit("pause", roomName);
+      socket.emit("pause_client", roomName);
+    }
+  };
+
+  const resume = (emit: boolean) => {
+    stopwatch.start();
+    if (emit) {
+      socket.emit("resume_client", roomName);
     }
   };
 
   useEffect(() => {
-    if (lastGot && playerName && lastGot.playerId !== playerName) {
-      onComplete(lastGot.item as DK64Item, lastGot.index, false);
+    if (lastCollected && playerName && lastCollected.playerId !== playerName) {
+      onComplete(lastCollected.item, lastCollected.index, false);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [lastGot]);
+  }, [lastCollected]);
 
   useEffect(() => {
-    const emittedPauseResume = () => {
-      pauseResume(false);
-    };
-
-    socket.on("paused", emittedPauseResume);
-    socket.on("reconfigure", reset);
-
     if (options.seed) {
       random.use(options.seed);
     }
 
     const notCompleted = [];
-    const initial = [...options.items];
-    for (let i = 0; i < total; i++) {
+    const initial = [...options.collectables];
+    for (let i = 0; i < options.total; i++) {
       const item = random.choice(initial);
 
       if (item) {
@@ -133,12 +123,19 @@ export const DK64Game = ({
 
     setAvailable(notCompleted);
     setDisplayed(onDeck);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  useEffect(() => {
+    socket.on("pause_server", () => pause(false));
+    socket.on("resume_server", () => resume(false));
+    socket.on("reconfig_server", reset);
 
     return () => {
-      socket.off("paused", emittedPauseResume);
-      socket.off("reconfigure", reset);
+      socket.off("pause_server", () => pause(false));
+      socket.off("resume_server", () => resume(false));
+      socket.off("reconfig_server", reset);
     };
-
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -158,33 +155,30 @@ export const DK64Game = ({
       <GameHeader
         timer={options.timer}
         stopwatch={stopwatch}
-        total={total}
+        total={options.total}
         completed={completed.length}
-        autoRefresh={options.autoRefresh}
       />
 
       <DKHR />
 
       {displayed.length > 0 &&
-        displayed.map((item: DK64Item, index: number) => {
-          const kongInfo = getKongColorInfo(item.name, options.useKongColors);
+        displayed.map((item: DK64Item | DKBBanana, index: number) => {
           return (
             <DKItemRow
               key={index}
-              name={kongInfo.label}
-              bgColor={options.useKongColors ? kongInfo.color : "#072207"}
+              name={item.name}
               disabled={completed.indexOf(item) !== -1}
-              onSuccess={() => onComplete(item, index, true)}
+              onComplete={() => onComplete(item, index, true)}
             />
           );
         })}
 
       <DKHR />
 
-      {options.timer && completed.length < total && (
+      {options.timer && completed.length < options.total && (
         <DKButton
           label={stopwatch.isRunning ? "Pause" : "Resume"}
-          handleClick={() => pauseResume(true)}
+          handleClick={() => (stopwatch.isRunning ? pause(true) : resume(true))}
         />
       )}
 
@@ -192,7 +186,7 @@ export const DK64Game = ({
         label="Reconfigure"
         handleClick={() => {
           reset();
-          socket.emit("reconfig", roomName);
+          socket.emit("reconfig_client", roomName);
         }}
       />
     </Grid>

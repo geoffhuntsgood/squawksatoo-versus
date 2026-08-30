@@ -23,7 +23,7 @@ import type { GameType } from "../utils/types";
 export const GameConfig = ({
   currentGame,
   setOptions,
-  setGoLabel,
+  setGoLabel
 }: {
   currentGame: GameType;
   setOptions: Dispatch<SetStateAction<GameOptions | null>>;
@@ -31,18 +31,15 @@ export const GameConfig = ({
 }) => {
   const [config, setConfig] = useState({
     count: 1,
-    dkbTotal: 5,
-    dk64Total: 5,
+    total: 5,
     seed: "",
-    timer: true,
-    autoRefresh: true,
-    recycle: false,
-    useKongColors: false
+    timer: true
   });
 
   const [layer, setLayer] = useState<string>(LayerName.Lagoon);
   const [dkbCats, setDKBCats] = useState<DKBCategory[]>([]);
   const [selectedDKBCats, setSelectedDKBCats] = useState<string[]>([]);
+  const [includePostgame, setIncludePostgame] = useState(false);
 
   const [level, setLevel] = useState<string>(LevelName.All);
   const [dk64Cats, setDK64Cats] = useState<DK64Category[]>([]);
@@ -50,7 +47,6 @@ export const GameConfig = ({
   const [dk64Barrels, setDK64Barrels] = useState<DK64Barrel[]>([]);
   const [selectedDK64Barrels, setSelectedDK64Barrels] = useState<string[]>([]);
 
-  const [includePostgame, setIncludePostgame] = useState(false);
   const [hellMode, setHellMode] = useState(false);
 
   const [bananas, setBananas] = useState<DKBBanana[]>(
@@ -61,7 +57,10 @@ export const GameConfig = ({
   );
 
   const getCountRange = () => {
-    if (currentGame === "DKB" && layer === LayerName.All) {
+    if (
+      (currentGame === "DKB" && layer === LayerName.All) ||
+      (currentGame === "DK64" && level === LevelName.All)
+    ) {
       return ["1", "2", "3", "4", "5", "10", "15", "20"];
     }
 
@@ -126,7 +125,7 @@ export const GameConfig = ({
 
     setConfig((prev) => ({
       ...prev,
-      dkbTotal: bananas.length,
+      total: bananas.length,
       count: bananas.length < prev.count ? bananas.length : prev.count
     }));
 
@@ -144,7 +143,7 @@ export const GameConfig = ({
 
     setConfig((prev) => ({
       ...prev,
-      dk64Total: items.length,
+      total: items.length,
       count: items.length < prev.count ? items.length : prev.count
     }));
 
@@ -154,22 +153,15 @@ export const GameConfig = ({
   }, [level, selectedDK64Cats, selectedDK64Barrels, hellMode]);
 
   useEffect(() => {
-    if (currentGame === "DKB" && bananas.length > 0) {
-      setGoLabel(`Get ${config.count}/${config.dkbTotal}`);
-      setOptions({
-        ...config,
-        bananas,
-        items: []
-      });
-    }
-    if (currentGame === "DK64" && items.length > 0) {
-      setGoLabel(`Get ${config.count}/${config.dk64Total}`);
-      setOptions({
-        ...config,
-        items,
-        bananas: []
-      });
-    }
+    setConfig((prev) => ({
+      ...prev,
+      total: currentGame === "DKB" ? bananas.length : items.length
+    }));
+    setGoLabel(`Get ${config.count}/${config.total}`);
+    setOptions({
+      ...config,
+      collectables: currentGame === "DKB" ? bananas : items
+    });
   }, [currentGame, bananas, items, config, setGoLabel, setOptions]);
 
   return (
@@ -232,28 +224,13 @@ export const GameConfig = ({
             selectItems={getCountRange()}
           />
 
-          {currentGame === "DKB" && (
-            <DKSelect
-              mini={true}
-              label="Total"
-              value={String(config.dkbTotal)}
-              handleChange={(val) =>
-                setConfig({ ...config, dkbTotal: Number(val) })
-              }
-              selectItems={getTotalRange()}
-            />
-          )}
-          {currentGame === "DK64" && (
-            <DKSelect
-              mini={true}
-              label="Total"
-              value={String(config.dk64Total)}
-              handleChange={(val) =>
-                setConfig({ ...config, dk64Total: Number(val) })
-              }
-              selectItems={getTotalRange()}
-            />
-          )}
+          <DKSelect
+            mini={true}
+            label="Total"
+            value={String(config.total)}
+            handleChange={(val) => setConfig({ ...config, total: Number(val) })}
+            selectItems={getTotalRange()}
+          />
 
           <DKTextBox
             label="Seed"
@@ -272,37 +249,6 @@ export const GameConfig = ({
               setConfig({ ...config, timer: Boolean(val) })
             }
           />
-
-          <DKCheckbox
-            label="Auto-refresh"
-            checked={config.autoRefresh}
-            handleChange={(val) =>
-              setConfig({ ...config, autoRefresh: Boolean(val) })
-            }
-            helpText={`Continuously adds new goals until you run out (currently ${currentGame === "DKB" ? bananas.length : items.length}).`}
-          />
-
-          {currentGame === "DKB" && config.autoRefresh && (
-            <DKCheckbox
-              label="Recycle wrong bananas"
-              checked={config.recycle}
-              handleChange={(val) =>
-                setConfig({ ...config, recycle: Boolean(val) })
-              }
-              helpText="Adds a wrong-marked banana back to the pool so that the correct one can be obtained later."
-            />
-          )}
-
-          {currentGame === "DK64" && (
-            <DKCheckbox
-              label="Use Kong colors"
-              checked={config.useKongColors}
-              handleChange={(val) =>
-                setConfig({ ...config, useKongColors: Boolean(val) })
-              }
-              helpText="Shows Kong colors instead of their names."
-            />
-          )}
 
           {currentGame === "DKB" && (
             <DKCheckbox

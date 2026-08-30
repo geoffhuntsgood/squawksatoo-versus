@@ -25,24 +25,28 @@ io.on("connection", (socket) => {
     console.log("A user disconnected!");
   });
 
-  socket.on("join_room", (roomName) => {
+  socket.on("join_room_client", (roomName) => {
     socket.join(roomName);
   });
 
-  socket.on("start", (roomName) => {
-    socket.to(roomName).emit("go");
+  socket.on("start_client", (roomName) => {
+    socket.to(roomName).emit("start_server");
   });
 
-  socket.on("pause", (roomName) => {
-    socket.to(roomName).emit("paused");
+  socket.on("pause_client", (roomName) => {
+    socket.to(roomName).emit("pause_server");
   });
 
-  socket.on("reconfig", (roomName) => {
-    socket.to(roomName).emit("reconfigure");
+  socket.on("resume_client", (roomName) => {
+    socket.to(roomName).emit("resume_server");
   });
 
-  socket.on("item_get", (item, index, playerId, roomName) => {
-    socket.to(roomName).emit("item_got", item, index, playerId);
+  socket.on("reconfig_client", (roomName) => {
+    socket.to(roomName).emit("reconfig_server");
+  });
+
+  socket.on("collected_client", (item, index, playerId, roomName) => {
+    socket.to(roomName).emit("collected_server", item, index, playerId);
   });
 });
 

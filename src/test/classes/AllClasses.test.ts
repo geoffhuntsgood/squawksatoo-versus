@@ -36,9 +36,6 @@ describe("Class instantiation sanity checks", () => {
   });
 
   test("GameOptions check", () => {
-    expect(
-      new GameOptions(3, 10, 10, "12345", true, false, true, false, [], [])
-        .timer
-    ).toBe(true);
+    expect(new GameOptions(3, 10, "12345", true, []).timer).toBe(true);
   });
 });

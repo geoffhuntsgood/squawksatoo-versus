@@ -1,4 +1,4 @@
-import { Cancel, CheckCircle } from "@mui/icons-material";
+import { CheckCircle } from "@mui/icons-material";
 import { Grid, IconButton, Typography } from "@mui/material";
 import { useEffect, useState } from "react";
 import { useReward } from "react-rewards";
@@ -9,18 +9,12 @@ export const GameHeader = ({
   timer,
   stopwatch,
   total,
-  completed,
-  failures,
-  autoRefresh,
-  recycle
+  completed
 }: {
   timer: boolean;
   stopwatch: useStopwatchResultType;
   total: number;
   completed: number;
-  failures?: number;
-  autoRefresh?: boolean;
-  recycle?: boolean;
 }) => {
   const [header, setHeader] = useState("Go get 'em!");
 
@@ -45,42 +39,20 @@ export const GameHeader = ({
   );
 
   const rightAnimate = !stopwatch.isRunning
-    ? { animation: "rightCounter 2s infinite" }
+    ? { animation: "completeCounter 2s infinite" }
     : { color: "white" };
-
-  const wrongAnimate = !stopwatch.isRunning
-    ? { animation: "wrongCounter 2s infinite" }
-    : { color: "white" };
-
-  const midColSize = () => {
-    if (failures !== undefined) {
-      return timer ? 2 : 3;
-    } else {
-      return timer ? 4 : 6;
-    }
-  };
 
   useEffect(() => {
-    if (
-      completed !== 0 &&
-      (completed === total ||
-        (failures && !recycle && completed + failures === total))
-    ) {
+    if (completed !== 0 && completed === total) {
       stopwatch.pause();
       setHeader("GG!");
       rewardLeft();
       rewardRight();
     } else {
-      if (autoRefresh) {
-        if (failures && !recycle) {
-          setHeader(`${total - completed - failures} left`);
-        } else {
-          setHeader(`${total - completed} left`);
-        }
-      }
+      setHeader(`${total - completed} left`);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [completed, total, failures]);
+  }, [completed, total]);
 
   return (
     <>
@@ -90,7 +62,7 @@ export const GameHeader = ({
         </Typography>
         <div id="rewardLeft" />
       </Grid>
-      <Grid size={midColSize()}>
+      <Grid size={timer ? 4 : 6}>
         <Typography color="textPrimary" variant="h1" sx={rightAnimate}>
           <IconButton sx={rightAnimate}>
             <CheckCircle />
@@ -98,16 +70,6 @@ export const GameHeader = ({
           {completed}
         </Typography>
       </Grid>
-      {failures !== undefined && (
-        <Grid size={midColSize()}>
-          <Typography color="textPrimary" variant="h1" sx={wrongAnimate}>
-            <IconButton sx={wrongAnimate}>
-              <Cancel />
-            </IconButton>
-            {failures}
-          </Typography>
-        </Grid>
-      )}
       <Grid size={4}>
         {timer && <DKTimer stopwatch={stopwatch} />}
         <div id="rewardRight" style={{ float: "right" }} />

@@ -5,14 +5,6 @@ const focused = "orange";
 const menuBG = "#003500";
 const menuFocus = "#005000";
 
-export const kongColors = {
-  Donkey: "#f1c232",
-  Diddy: "#ee0000",
-  Lanky: "#4444ff",
-  Tiny: "#9900ff",
-  Chunky: "#009900"
-};
-
 export const theme = createTheme({
   components: {
     MuiButton: {

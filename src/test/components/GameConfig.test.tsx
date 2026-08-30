@@ -40,7 +40,7 @@ describe("GameConfig tests", () => {
       expect(setOptionsMock).toHaveBeenLastCalledWith(
         expect.objectContaining({
           count: 5,
-          dkbTotal: 20,
+          total: 20,
           timer: false,
           autoRefresh: true,
           recycle: true,
@@ -112,16 +112,12 @@ describe("GameConfig tests", () => {
       await screen.getByText("10").first().click();
       await userEvent.type(screen.getByText("Seed").first(), "12345");
       await screen.getByText("Timer").click();
-      await screen.getByText("Auto-refresh").click();
-      await screen.getByText("Use Kong colors").click();
 
       expect(setOptionsMock).toHaveBeenLastCalledWith(
         expect.objectContaining({
           count: 5,
-          dk64Total: 10,
+          total: 10,
           timer: false,
-          autoRefresh: false,
-          useKongColors: true,
           seed: "12345"
         })
       );
@@ -134,7 +130,6 @@ describe("GameConfig tests", () => {
       await selects[3].click(); // Count
       await screen.getByText("5").click();
       await screen.getByText("Hell Mode").click();
-      await screen.getByText("Auto-refresh").click();
       await selects[0].click(); // Level
       await screen.getByText(LevelName.Factory).click();
       await selects[1].click(); // Category

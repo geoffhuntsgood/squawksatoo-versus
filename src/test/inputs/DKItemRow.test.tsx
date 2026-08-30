@@ -3,17 +3,14 @@ import { render } from "vitest-browser-react";
 import { DKItemRow } from "../../inputs";
 
 describe("DKItemRow tests", () => {
-  const successMock = vi.fn();
-  const failureMock = vi.fn();
+  const completeMock = vi.fn();
 
-  const getScreen = (disabled: boolean, failure: boolean = false) => {
+  const getScreen = (disabled: boolean) => {
     return render(
       <DKItemRow
         name="Test Row"
         disabled={disabled}
-        bgColor="blue"
-        onSuccess={successMock}
-        onFailure={failure ? failureMock : undefined}
+        onComplete={completeMock}
       />
     );
   };
@@ -31,30 +28,23 @@ describe("DKItemRow tests", () => {
     });
   });
 
-  test("Check success action", async () => {
+  test("Check complete action on button click", async () => {
     const screen = await getScreen(false);
     await screen.getByRole("button").click();
-    expect(successMock).toHaveBeenCalledOnce();
+    expect(completeMock).toHaveBeenCalledOnce();
   });
 
-  test("Check success action on text click", async () => {
+  test("Check complete action on text click", async () => {
     vi.resetAllMocks();
     const screen = await getScreen(false);
     await screen.getByText("Test Row").click();
-    expect(successMock).toHaveBeenCalledOnce();
+    expect(completeMock).toHaveBeenCalledOnce();
   });
 
   test("Check no interaction on text click when disabled", async () => {
     vi.resetAllMocks();
     const screen = await getScreen(true);
     await screen.getByText("Test Row").click();
-    expect(successMock).not.toHaveBeenCalled();
-  });
-
-  test("Check failure action", async () => {
-    vi.resetAllMocks();
-    const screen = await getScreen(false, true);
-    await screen.getByRole("button").last().click();
-    expect(failureMock).toHaveBeenCalledOnce();
+    expect(completeMock).not.toHaveBeenCalled();
   });
 });

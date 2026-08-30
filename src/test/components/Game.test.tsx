@@ -1,44 +1,36 @@
 import { describe, expect, test, vi } from "vitest";
 import { render } from "vitest-browser-react";
-import type { DK64Item } from "../../classes";
-import { DK64Game } from "../../components";
+import type { DK64Item, DKBBanana } from "../../classes";
+import { Game } from "../../components";
 import { DK64Category } from "../../enums";
 import { factory } from "../../levels/factory";
 import { japes } from "../../levels/japes";
-import { socket } from "../../server/socket";
+import { socket } from "../../utils/socket";
 
-describe("DK64Game tests", () => {
+describe("Game tests", () => {
   const setOptionsMock = vi.fn();
   const setStartMock = vi.fn();
 
   const getScreen = (
     count: number,
-    dk64Total: number,
-    seed: string | null,
+    total: number,
+    seed: string,
     timer: boolean,
-    autoRefresh: boolean,
-    useKongColors: boolean,
-    items: DK64Item[]
+    collectables: (DK64Item | DKBBanana)[]
   ) => {
     return render(
-      <DK64Game
+      <Game
         options={{
           count,
-          dkbTotal: 0,
-          dk64Total,
-          seed: seed || "",
+          total,
+          seed,
           timer,
-          autoRefresh,
-          recycle: false,
-          useKongColors,
-          bananas: [],
-          items
+          collectables
         }}
         setOptions={setOptionsMock}
         setStart={setStartMock}
-        isConnected={false}
         socket={socket}
-        lastGot={null}
+        lastCollected={null}
         playerName="Test Player"
         roomName="TestRoom"
       />
@@ -46,15 +38,7 @@ describe("DK64Game tests", () => {
   };
 
   test("Check game with seed and no autoRefresh", async () => {
-    const screen = await getScreen(
-      5,
-      10,
-      "Seed",
-      true,
-      false,
-      false,
-      japes.items
-    );
+    const screen = await getScreen(5, 10, "Seed", true, japes.items);
     expect(screen.getByText("Go get 'em!")).toBeVisible();
     expect(screen.getByText("Japes Tunnel Fairy")).toBeVisible();
 
@@ -69,15 +53,7 @@ describe("DK64Game tests", () => {
   });
 
   test("Check game with seed and autoRefresh (with reset)", async () => {
-    const screen = await getScreen(
-      1,
-      10,
-      "Seed",
-      false,
-      true,
-      true,
-      japes.items
-    );
+    const screen = await getScreen(1, 10, "Seed", false, japes.items);
     expect(screen.getByText("10 left")).toBeVisible();
     expect(screen.getByText("Japes Tunnel Fairy")).toBeVisible();
 
@@ -100,16 +76,14 @@ describe("DK64Game tests", () => {
     const screen = await getScreen(
       1,
       5,
-      null,
+      "Seed",
       true,
-      false,
-      false,
       factory.items.filter((item) => item.category === DK64Category.CompanyCoin)
     );
 
     await screen.getByText("PAUSE").click();
     expect(screen.getByText("0").first()).toHaveStyle(
-      "animation: rightCounter 2s infinite"
+      "animation: completeCounter 2s infinite"
     );
     await screen.getByText("RESUME").click();
 

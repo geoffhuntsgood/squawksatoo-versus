@@ -9,7 +9,6 @@ import { galleon } from "../levels/galleon";
 import { helm } from "../levels/helm";
 import { isles } from "../levels/isles";
 import { japes } from "../levels/japes";
-import { kongColors } from "./theme";
 
 const allLevels: DK64Level[] = [
   isles,
@@ -72,43 +71,4 @@ export const getItemsForCategories = (
   } else {
     return items;
   }
-};
-
-export const getKongColorInfo = (name: string, useKongColors: boolean) => {
-  let label = name;
-  let color = "black";
-
-  if (!useKongColors) {
-    return {
-      label,
-      color
-    };
-  }
-
-  const levels = [
-    "Japes",
-    "Aztec",
-    "Factory",
-    "Galleon",
-    "Forest",
-    "Caves",
-    "Castle",
-    "Helm",
-    "Isles"
-  ];
-  const kongs = ["Donkey", "Diddy", "Lanky", "Tiny", "Chunky"];
-
-  levels.some((level) => {
-    kongs.some((kong) => {
-      if (name.startsWith(`${level} ${kong}`)) {
-        label = name.replace(` ${kong}`, "");
-        color = kongColors[kong as keyof typeof kongColors];
-      }
-    });
-  });
-
-  return {
-    label,
-    color
-  };
 };

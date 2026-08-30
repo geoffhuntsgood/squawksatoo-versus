@@ -25,7 +25,7 @@ export const DKRoomDialog = ({
   setRoomName: Dispatch<SetStateAction<string>>;
   setupAction: () => void;
 }) => (
-  <Dialog open={open} onClose={setOpen}>
+  <Dialog open={open} onClose={() => setOpen(false)}>
     <DialogTitle>Join a Room</DialogTitle>
     <DialogContent>
       <DKTextBox

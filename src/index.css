@@ -15,19 +15,7 @@
   }
 }
 
-@keyframes wrongCounter {
-  0% {
-    color: white;
-  }
-  50% {
-    color: #b71c1c;
-  }
-  100% {
-    color: white;
-  }
-}
-
-@keyframes rightCounter {
+@keyframes completeCounter {
   0% {
     color: white;
   }

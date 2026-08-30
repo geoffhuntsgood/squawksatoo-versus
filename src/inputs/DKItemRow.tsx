@@ -1,43 +1,32 @@
-import Cancel from "@mui/icons-material/Cancel";
 import CheckCircle from "@mui/icons-material/CheckCircle";
-import { colors, Grid, IconButton, Typography } from "@mui/material";
+import { Grid, IconButton, Typography } from "@mui/material";
 import type { MouseEventHandler } from "react";
 
 export const DKItemRow = ({
   name,
   disabled,
-  bgColor,
-  onSuccess,
-  onFailure
+  onComplete
 }: {
   name: string;
   disabled: boolean;
-  bgColor: string;
-  onSuccess: MouseEventHandler;
-  onFailure?: MouseEventHandler;
+  onComplete: MouseEventHandler;
 }) => {
   const styles = {
     text: {
       textDecoration: disabled ? "line-through" : "none"
     },
     check: {
-      color: bgColor && bgColor !== "#072207" ? "white" : colors.green[900],
+      color: "green",
       "&:hover": {
-        color: bgColor && bgColor !== "#072207" ? "lightgreen" : "green"
-      }
-    },
-    cancel: {
-      color: colors.red[900],
-      "&:hover": {
-        color: "red"
+        color: "lightgreen"
       }
     }
   };
 
   return (
-    <Grid size={12} sx={{ backgroundColor: bgColor }}>
+    <Grid size={12}>
       <Typography color="textPrimary" variant="h3" sx={styles.text}>
-        <IconButton sx={styles.check} onClick={onSuccess} disabled={disabled}>
+        <IconButton sx={styles.check} onClick={onComplete} disabled={disabled}>
           <CheckCircle />
         </IconButton>
         <span
@@ -45,19 +34,10 @@ export const DKItemRow = ({
             userSelect: "none",
             cursor: !disabled ? "pointer" : "not-allowed"
           }}
-          onClick={!disabled ? onSuccess : () => {}}
+          onClick={!disabled ? onComplete : () => {}}
         >
           {name}
         </span>
-        {onFailure && (
-          <IconButton
-            sx={styles.cancel}
-            onClick={onFailure}
-            disabled={disabled}
-          >
-            <Cancel />
-          </IconButton>
-        )}
       </Typography>
     </Grid>
   );

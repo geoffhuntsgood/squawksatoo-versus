@@ -2,7 +2,7 @@ import type { DK64Item, DKBBanana } from "../classes";
 
 export type GameType = "DKB" | "DK64";
 
-export type LastGot = {
+export type LastCollected = {
   item: DK64Item | DKBBanana;
   index: number;
   playerId: string;

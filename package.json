@@ -1,11 +1,11 @@
 {
-  "name": "squawksatoo",
+  "name": "squawksatoo-versus",
   "private": true,
   "version": "1.0.0",
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "tsc -b && vite build && xcopy src\\server\\server.js dist\\",
+    "build": "tsc -b && vite build && xcopy server\\server.js dist\\",
     "server": "node dist/server.js",
     "lint": "eslint .",
     "test": "vitest run --browser.headless",

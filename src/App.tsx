@@ -1,43 +1,45 @@
-import { Box, Card, Tab, Tabs, ThemeProvider, Typography } from "@mui/material";
+import { RotateLeft } from "@mui/icons-material";
+import {
+  Box,
+  Card,
+  IconButton,
+  Tab,
+  Tabs,
+  ThemeProvider,
+  Typography
+} from "@mui/material";
 import { useEffect, useState } from "react";
 import { DK64Item, DKBBanana, GameOptions } from "./classes";
-import { DK64Game, DKBGame, GameConfig } from "./components";
+import { Game, GameConfig } from "./components";
 import { DKButton, DKRoomDialog } from "./inputs";
-import { socket } from "./server/socket";
+import { socket } from "./utils/socket";
 import { theme } from "./utils/theme";
-import { type GameType, type LastGot } from "./utils/types";
+import { type GameType, type LastCollected } from "./utils/types";
 
 const App = () => {
   const [roomCreateOpen, setRoomCreateOpen] = useState(true);
   const [playerName, setPlayerName] = useState("");
   const [roomName, setRoomName] = useState("");
-  const [isConnected, setIsConnected] = useState(socket.connected);
-  const [lastGot, setLastGot] = useState<LastGot | null>(null);
+  const [lastCollected, setLastCollected] = useState<LastCollected | null>(
+    null
+  );
 
   const [game, setGame] = useState<GameType>("DKB");
   const [gameOptions, setGameOptions] = useState<GameOptions | null>(null);
   const [goLabel, setGoLabel] = useState("");
   const [start, setStart] = useState(false);
 
-  const setupAction = () => {
-    socket.emit("join_room", roomName);
+  const joinRoomEmit = () => {
+    socket.emit("join_room_client", roomName);
   };
 
   useEffect(() => {
-    const onConnect = () => {
-      setIsConnected(true);
-    };
-
-    const onDisconnect = () => {
-      setIsConnected(false);
-    };
-
     const updateLastItem = (
       item: DK64Item | DKBBanana,
       index: number,
       playerId: string
     ) => {
-      setLastGot({
+      setLastCollected({
         item,
         index,
         playerId
@@ -48,16 +50,12 @@ const App = () => {
       setStart(true);
     };
 
-    socket.on("connect", onConnect);
-    socket.on("disconnect", onDisconnect);
-    socket.on("item_got", updateLastItem);
-    socket.on("go", goEvent);
+    socket.on("collected_server", updateLastItem);
+    socket.on("start_server", goEvent);
 
     return () => {
-      socket.off("connect", onConnect);
-      socket.off("disconnect", onDisconnect);
-      socket.off("item_got", updateLastItem);
-      socket.off("go", goEvent);
+      socket.off("collected_server", updateLastItem);
+      socket.off("start_server", goEvent);
     };
   }, []);
 
@@ -85,7 +83,7 @@ const App = () => {
             setPlayerName={setPlayerName}
             roomName={roomName}
             setRoomName={setRoomName}
-            setupAction={setupAction}
+            setupAction={joinRoomEmit}
           />
 
           {playerName && roomName && (
@@ -96,6 +94,12 @@ const App = () => {
               <Typography color="textPrimary" variant="h2">
                 Room: {roomName}
               </Typography>
+              <IconButton
+                sx={{ color: "white", marginLeft: "-1rem" }}
+                onClick={() => setRoomCreateOpen(true)}
+              >
+                <RotateLeft />
+              </IconButton>
             </span>
           )}
 
@@ -118,35 +122,23 @@ const App = () => {
             <DKButton
               label={goLabel}
               handleClick={() => {
-                socket.emit("start", roomName);
+                socket.emit("start_client", roomName);
                 setStart(true);
               }}
             />
           </Box>
         </>
       )}
-      {start && gameOptions && (
-        <>
-          {game === "DKB" && gameOptions.bananas.length > 0 && (
-            <DKBGame
-              options={gameOptions}
-              setOptions={setGameOptions}
-              setStart={setStart}
-            />
-          )}
-          {game === "DK64" && gameOptions.items.length > 0 && (
-            <DK64Game
-              options={gameOptions}
-              setOptions={setGameOptions}
-              setStart={setStart}
-              isConnected={isConnected}
-              socket={socket}
-              lastGot={lastGot}
-              playerName={playerName}
-              roomName={roomName}
-            />
-          )}
-        </>
+      {socket.connected && start && gameOptions && (
+        <Game
+          options={gameOptions}
+          setOptions={setGameOptions}
+          setStart={setStart}
+          socket={socket}
+          lastCollected={lastCollected}
+          playerName={playerName}
+          roomName={roomName}
+        />
       )}
     </ThemeProvider>
   );

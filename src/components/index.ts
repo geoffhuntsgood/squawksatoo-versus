@@ -1,4 +1,3 @@
-export * from "./DK64Game";
-export * from "./DKBGame";
+export * from "./Game";
 export * from "./GameConfig";
 export * from "./GameHeader";
