@@ -29,10 +29,6 @@ const App = () => {
   const [goLabel, setGoLabel] = useState("");
   const [start, setStart] = useState(false);
 
-  const joinRoomEmit = () => {
-    socket.emit("join_room_client", roomName);
-  };
-
   useEffect(() => {
     const updateLastItem = (
       item: DK64Item | DKBBanana,
@@ -46,28 +42,28 @@ const App = () => {
       });
     };
 
-    const goEvent = () => {
+    const startAll = () => {
       setStart(true);
     };
 
     socket.on("collected_server", updateLastItem);
-    socket.on("start_server", goEvent);
+    socket.on("start_server", startAll);
 
     return () => {
-      socket.off("collected_server", updateLastItem);
-      socket.off("start_server", goEvent);
+      socket.off("collected_server");
+      socket.off("start_server");
     };
   }, []);
 
   return (
     <ThemeProvider theme={theme}>
       <Card>
-        <img src="./img/squawks.png" height={50} width={50} />
+        <img src="./img/angy-squawks.png" height={50} width={50} />
         <Typography color="textPrimary" variant="h1">
-          Squawksatoo
+          Squawksatoo <i>VERSUS</i>
         </Typography>
         <img
-          src="./img/squawks.png"
+          src="./img/angy-squawks.png"
           height={50}
           width={50}
           style={{ transform: "scaleX(-1)" }}
@@ -83,7 +79,9 @@ const App = () => {
             setPlayerName={setPlayerName}
             roomName={roomName}
             setRoomName={setRoomName}
-            setupAction={joinRoomEmit}
+            onCloseAction={() => {
+              socket.emit("join_room_client", roomName);
+            }}
           />
 
           {playerName && roomName && (
@@ -136,6 +134,7 @@ const App = () => {
           setStart={setStart}
           socket={socket}
           lastCollected={lastCollected}
+          setLastCollected={setLastCollected}
           playerName={playerName}
           roomName={roomName}
         />

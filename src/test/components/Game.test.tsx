@@ -22,7 +22,8 @@ describe("Game tests", () => {
       <Game
         options={{
           count,
-          total,
+          dkbTotal: total,
+          dk64Total: total,
           seed,
           timer,
           collectables

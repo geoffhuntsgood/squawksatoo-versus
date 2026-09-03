@@ -15,6 +15,7 @@ export const Game = ({
   setStart,
   socket,
   lastCollected,
+  setLastCollected,
   playerName,
   roomName
 }: {
@@ -23,6 +24,7 @@ export const Game = ({
   setStart: Dispatch<SetStateAction<boolean>>;
   socket: Socket;
   lastCollected: LastCollected | null;
+  setLastCollected: Dispatch<SetStateAction<LastCollected | null>>;
   playerName: string;
   roomName: string;
 }) => {
@@ -31,7 +33,13 @@ export const Game = ({
   const [displayed, setDisplayed] = useState<(DK64Item | DKBBanana)[]>([]);
   const [completed, setCompleted] = useState<(DK64Item | DKBBanana)[]>([]);
 
-  const stopwatch = useStopwatch({ interval: 20 });
+  const stopwatch = useStopwatch({ autoStart: true, interval: 20 });
+
+  const total = (Object.values(DK64Category) as string[]).includes(
+    options.collectables[0].category
+  )
+    ? options.dk64Total
+    : options.dkbTotal;
 
   const replaceItem = (displayIndex: number) => {
     const notCompleted = [...available];
@@ -63,21 +71,18 @@ export const Game = ({
 
   const reset = () => {
     setOptions(null);
+    setLastCollected(null);
     setStart(false);
   };
 
-  const pause = (emit: boolean) => {
+  const pauseAll = () => {
     stopwatch.pause();
-    if (emit) {
-      socket.emit("pause_client", roomName);
-    }
+    socket.emit("pause_client", roomName);
   };
 
-  const resume = (emit: boolean) => {
+  const resumeAll = () => {
     stopwatch.start();
-    if (emit) {
-      socket.emit("resume_client", roomName);
-    }
+    socket.emit("resume_client", roomName);
   };
 
   useEffect(() => {
@@ -94,7 +99,13 @@ export const Game = ({
 
     const notCompleted = [];
     const initial = [...options.collectables];
-    for (let i = 0; i < options.total; i++) {
+    const total = (Object.values(DK64Category) as string[]).includes(
+      initial[0].category
+    )
+      ? options.dk64Total
+      : options.dkbTotal;
+
+    for (let i = 0; i < total; i++) {
       const item = random.choice(initial);
 
       if (item) {
@@ -127,14 +138,14 @@ export const Game = ({
   }, []);
 
   useEffect(() => {
-    socket.on("pause_server", () => pause(false));
-    socket.on("resume_server", () => resume(false));
+    socket.on("pause_server", () => stopwatch.pause());
+    socket.on("resume_server", () => stopwatch.start());
     socket.on("reconfig_server", reset);
 
     return () => {
-      socket.off("pause_server", () => pause(false));
-      socket.off("resume_server", () => resume(false));
-      socket.off("reconfig_server", reset);
+      socket.off("pause_server");
+      socket.off("resume_server");
+      socket.off("reconfig_server");
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -155,7 +166,7 @@ export const Game = ({
       <GameHeader
         timer={options.timer}
         stopwatch={stopwatch}
-        total={options.total}
+        total={total}
         completed={completed.length}
       />
 
@@ -175,10 +186,10 @@ export const Game = ({
 
       <DKHR />
 
-      {options.timer && completed.length < options.total && (
+      {options.timer && completed.length < total && (
         <DKButton
           label={stopwatch.isRunning ? "Pause" : "Resume"}
-          handleClick={() => (stopwatch.isRunning ? pause(true) : resume(true))}
+          handleClick={() => (stopwatch.isRunning ? pauseAll() : resumeAll())}
         />
       )}
 

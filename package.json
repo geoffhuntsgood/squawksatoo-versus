@@ -7,6 +7,7 @@
     "dev": "vite",
     "build": "tsc -b && vite build && xcopy server\\server.js dist\\",
     "server": "node dist/server.js",
+    "start": "npm run build && npm run server",
     "lint": "eslint .",
     "test": "vitest run --browser.headless",
     "test:watch": "vitest --browser.headless",

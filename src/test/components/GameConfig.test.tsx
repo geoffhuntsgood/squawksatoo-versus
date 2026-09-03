@@ -40,7 +40,8 @@ describe("GameConfig tests", () => {
       expect(setOptionsMock).toHaveBeenLastCalledWith(
         expect.objectContaining({
           count: 5,
-          total: 20,
+          dkbTotal: 20,
+          dk64Total: 5,
           timer: false,
           autoRefresh: true,
           recycle: true,
@@ -116,7 +117,8 @@ describe("GameConfig tests", () => {
       expect(setOptionsMock).toHaveBeenLastCalledWith(
         expect.objectContaining({
           count: 5,
-          total: 10,
+          dkbTotal: 10,
+          dk64Total: 5,
           timer: false,
           seed: "12345"
         })

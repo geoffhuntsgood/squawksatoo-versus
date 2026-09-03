@@ -15,7 +15,7 @@ export const DKRoomDialog = ({
   setPlayerName,
   roomName,
   setRoomName,
-  setupAction
+  onCloseAction
 }: {
   open: boolean;
   setOpen: Dispatch<SetStateAction<boolean>>;
@@ -23,9 +23,9 @@ export const DKRoomDialog = ({
   setPlayerName: Dispatch<SetStateAction<string>>;
   roomName: string;
   setRoomName: Dispatch<SetStateAction<string>>;
-  setupAction: () => void;
+  onCloseAction: () => void;
 }) => (
-  <Dialog open={open} onClose={() => setOpen(false)}>
+  <Dialog open={open} onClose={setOpen}>
     <DialogTitle>Join a Room</DialogTitle>
     <DialogContent>
       <DKTextBox
@@ -44,7 +44,7 @@ export const DKRoomDialog = ({
         <DKButton
           label="Go!"
           handleClick={() => {
-            setupAction();
+            onCloseAction();
             setOpen(false);
           }}
         />

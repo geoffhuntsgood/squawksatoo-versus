@@ -29,13 +29,6 @@ export const GameConfig = ({
   setOptions: Dispatch<SetStateAction<GameOptions | null>>;
   setGoLabel: Dispatch<SetStateAction<string>>;
 }) => {
-  const [config, setConfig] = useState({
-    count: 1,
-    total: 5,
-    seed: "",
-    timer: true
-  });
-
   const [layer, setLayer] = useState<string>(LayerName.Lagoon);
   const [dkbCats, setDKBCats] = useState<DKBCategory[]>([]);
   const [selectedDKBCats, setSelectedDKBCats] = useState<string[]>([]);
@@ -56,11 +49,16 @@ export const GameConfig = ({
     getItemsForCategories(level as LevelName, [], hellMode)
   );
 
+  const [config, setConfig] = useState({
+    count: 1,
+    dkbTotal: bananas.length,
+    dk64Total: items.length,
+    seed: "",
+    timer: true
+  });
+
   const getCountRange = () => {
-    if (
-      (currentGame === "DKB" && layer === LayerName.All) ||
-      (currentGame === "DK64" && level === LevelName.All)
-    ) {
+    if (currentGame === "DKB" && layer === LayerName.All) {
       return ["1", "2", "3", "4", "5", "10", "15", "20"];
     }
 
@@ -125,7 +123,7 @@ export const GameConfig = ({
 
     setConfig((prev) => ({
       ...prev,
-      total: bananas.length,
+      dkBTotal: bananas.length,
       count: bananas.length < prev.count ? bananas.length : prev.count
     }));
 
@@ -143,7 +141,7 @@ export const GameConfig = ({
 
     setConfig((prev) => ({
       ...prev,
-      total: items.length,
+      dk64Total: items.length,
       count: items.length < prev.count ? items.length : prev.count
     }));
 
@@ -153,11 +151,9 @@ export const GameConfig = ({
   }, [level, selectedDK64Cats, selectedDK64Barrels, hellMode]);
 
   useEffect(() => {
-    setConfig((prev) => ({
-      ...prev,
-      total: currentGame === "DKB" ? bananas.length : items.length
-    }));
-    setGoLabel(`Get ${config.count}/${config.total}`);
+    setGoLabel(
+      `Get ${config.count}/${currentGame === "DKB" ? config.dkbTotal : config.dk64Total}`
+    );
     setOptions({
       ...config,
       collectables: currentGame === "DKB" ? bananas : items
@@ -224,13 +220,29 @@ export const GameConfig = ({
             selectItems={getCountRange()}
           />
 
-          <DKSelect
-            mini={true}
-            label="Total"
-            value={String(config.total)}
-            handleChange={(val) => setConfig({ ...config, total: Number(val) })}
-            selectItems={getTotalRange()}
-          />
+          {currentGame === "DKB" && (
+            <DKSelect
+              mini={true}
+              label="Total"
+              value={String(config.dkbTotal)}
+              handleChange={(val) =>
+                setConfig({ ...config, dkbTotal: Number(val) })
+              }
+              selectItems={getTotalRange()}
+            />
+          )}
+
+          {currentGame === "DK64" && (
+            <DKSelect
+              mini={true}
+              label="Total"
+              value={String(config.dk64Total)}
+              handleChange={(val) =>
+                setConfig({ ...config, dk64Total: Number(val) })
+              }
+              selectItems={getTotalRange()}
+            />
+          )}
 
           <DKTextBox
             label="Seed"
