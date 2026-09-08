@@ -5,8 +5,8 @@ import {
   DialogTitle
 } from "@mui/material";
 import { type Dispatch, type SetStateAction } from "react";
-import { DKButton } from "./DKButton";
-import { DKTextBox } from "./DKTextBox";
+import { DKButton } from "../inputs/DKButton";
+import { DKTextBox } from "../inputs/DKTextBox";
 
 export const DKRoomDialog = ({
   open,

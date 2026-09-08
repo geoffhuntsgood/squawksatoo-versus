@@ -28,7 +28,7 @@
 }
 
 :root {
-  background-color: #072207;
+  background-color: #220707;
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
@@ -47,7 +47,7 @@ body {
 }
 
 ::-webkit-scrollbar-track {
-  background: green;
+  background: red;
 }
 
 ::-webkit-scrollbar-thumb {

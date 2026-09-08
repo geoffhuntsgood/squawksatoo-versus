@@ -4,8 +4,9 @@ import { useEffect, useState, type Dispatch, type SetStateAction } from "react";
 import { useStopwatch } from "react-timer-hook";
 import type { Socket } from "socket.io-client";
 import type { DK64Item, DKBBanana, GameOptions } from "../classes";
+import { DKResetDialog } from "../dialogs";
 import { DK64Category } from "../enums";
-import { DKButton, DKDialog, DKHR, DKItemRow } from "../inputs";
+import { DKButton, DKHR, DKItemRow } from "../inputs";
 import type { LastCollected } from "../utils/types";
 import { GameHeader } from "./GameHeader";
 
@@ -152,15 +153,10 @@ export const Game = ({
 
   return (
     <Grid container spacing={1}>
-      <DKDialog
-        title="Are you sure?"
-        description="You'll lose your current progress!"
+      <DKResetDialog
         open={reconfigOpen}
         setOpen={setReconfigOpen}
-        yesLabel="Yeah"
-        noLabel="Nah"
-        handleYesAction={reset}
-        handleNoAction={() => stopwatch.start()}
+        handleCancelAction={() => stopwatch.start()}
       />
 
       <GameHeader

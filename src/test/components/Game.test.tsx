@@ -10,6 +10,7 @@ import { socket } from "../../utils/socket";
 describe("Game tests", () => {
   const setOptionsMock = vi.fn();
   const setStartMock = vi.fn();
+  const setLastCollectedMock = vi.fn();
 
   const getScreen = (
     count: number,
@@ -32,6 +33,7 @@ describe("Game tests", () => {
         setStart={setStartMock}
         socket={socket}
         lastCollected={null}
+        setLastCollected={setLastCollectedMock}
         playerName="Test Player"
         roomName="TestRoom"
       />

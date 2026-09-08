@@ -2,8 +2,8 @@ import { createTheme } from "@mui/material/styles";
 
 const outlined = "darkorange";
 const focused = "orange";
-const menuBG = "#003500";
-const menuFocus = "#005000";
+const menuBG = "#350000";
+const menuFocus = "#500000";
 
 export const theme = createTheme({
   components: {

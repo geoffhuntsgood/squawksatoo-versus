@@ -33,6 +33,18 @@ io.on("connection", (socket) => {
     socket.to(roomName).emit("start_server");
   });
 
+  socket.on("request_start_client", (roomName, gameOptions) => {
+    socket.to(roomName).emit("request_start_server", gameOptions);
+  });
+
+  socket.on("confirm_start_client", (roomName) => {
+    socket.to(roomName).emit("confirm_start_server");
+  });
+
+  socket.on("deny_start_client", (roomName) => {
+    socket.to(roomName).emit("deny_start_server");
+  });
+
   socket.on("pause_client", (roomName) => {
     socket.to(roomName).emit("pause_server");
   });

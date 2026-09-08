@@ -11,47 +11,68 @@ import {
 import { useEffect, useState } from "react";
 import { DK64Item, DKBBanana, GameOptions } from "./classes";
 import { Game, GameConfig } from "./components";
-import { DKButton, DKRoomDialog } from "./inputs";
+import { DKRoomDialog, DKStartDialog } from "./dialogs";
+import { DKButton } from "./inputs";
 import { socket } from "./utils/socket";
 import { theme } from "./utils/theme";
 import { type GameType, type LastCollected } from "./utils/types";
 
 const App = () => {
   const [roomCreateOpen, setRoomCreateOpen] = useState(true);
+  const [confirmStartOpen, setRequestStartOpen] = useState(false);
   const [playerName, setPlayerName] = useState("");
   const [roomName, setRoomName] = useState("");
   const [lastCollected, setLastCollected] = useState<LastCollected | null>(
     null
   );
 
-  const [game, setGame] = useState<GameType>("DKB");
+  const [currentGame, setCurrentGame] = useState<GameType>("DKB");
   const [gameOptions, setGameOptions] = useState<GameOptions | null>(null);
+  const [requestedOptions, setRequestedOptions] = useState<GameOptions | null>(null);
   const [goLabel, setGoLabel] = useState("");
   const [start, setStart] = useState(false);
 
+  const updateLastItem = (
+    item: DK64Item | DKBBanana,
+    index: number,
+    playerId: string
+  ) => {
+    setLastCollected({
+      item,
+      index,
+      playerId
+    });
+  };
+
+  const makeStartRequest = () => {
+    socket.emit("request_start_client", roomName, gameOptions);
+  };
+
+  const denyStart = () => {
+    setRequestStartOpen(false);
+    socket.emit("deny_start_client", roomName);
+  };
+
+  const confirmStartRequest = () => {
+    socket.emit("start_client", roomName);
+    setGameOptions(requestedOptions);
+    setStart(true);
+  };
+
   useEffect(() => {
-    const updateLastItem = (
-      item: DK64Item | DKBBanana,
-      index: number,
-      playerId: string
-    ) => {
-      setLastCollected({
-        item,
-        index,
-        playerId
-      });
-    };
-
-    const startAll = () => {
-      setStart(true);
-    };
-
     socket.on("collected_server", updateLastItem);
-    socket.on("start_server", startAll);
+    socket.on("start_server", () => setStart(true));
+    socket.on("request_start_server", (options: GameOptions) => {
+      setRequestedOptions(options);
+      setRequestStartOpen(true)
+    });
+    socket.on("deny_start_server", () => setRequestStartOpen(false));
 
     return () => {
       socket.off("collected_server");
       socket.off("start_server");
+      socket.off("request_start_server");
+      socket.off("deny_start_server");
     };
   }, []);
 
@@ -60,7 +81,7 @@ const App = () => {
       <Card>
         <img src="./img/angy-squawks.png" height={50} width={50} />
         <Typography color="textPrimary" variant="h1">
-          Squawksatoo <i>VERSUS</i>
+          Squawksatoo <i>VS</i>
         </Typography>
         <img
           src="./img/angy-squawks.png"
@@ -84,6 +105,15 @@ const App = () => {
             }}
           />
 
+          <DKStartDialog
+            open={confirmStartOpen}
+            setOpen={setRequestStartOpen}
+            currentGame={currentGame}
+            requestedOptions={requestedOptions}
+            onAcceptAction={confirmStartRequest}
+            onDenyAction={denyStart}
+          />
+
           {playerName && roomName && (
             <span style={{ position: "absolute", top: "5rem", left: "10px" }}>
               <Typography color="textPrimary" variant="h2">
@@ -103,15 +133,15 @@ const App = () => {
 
           <Tabs
             centered
-            value={game}
-            onChange={(_, newValue) => setGame(newValue)}
+            value={currentGame}
+            onChange={(_, newValue) => setCurrentGame(newValue)}
           >
             <Tab label="DKB" value="DKB" />
             <Tab label="DK64" value="DK64" />
           </Tabs>
 
           <GameConfig
-            currentGame={game}
+            currentGame={currentGame}
             setOptions={setGameOptions}
             setGoLabel={setGoLabel}
           />
@@ -119,10 +149,7 @@ const App = () => {
           <Box sx={{ textAlign: "center" }}>
             <DKButton
               label={goLabel}
-              handleClick={() => {
-                socket.emit("start_client", roomName);
-                setStart(true);
-              }}
+              handleClick={makeStartRequest}
             />
           </Box>
         </>
