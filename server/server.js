@@ -5,6 +5,7 @@ import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { Server } from "socket.io";
 
+const port = process.env.PORT || 3000;
 const app = express();
 app.use(cors({ origin: true }));
 
@@ -62,6 +63,6 @@ io.on("connection", (socket) => {
   });
 });
 
-server.listen(3000, () => {
-  console.log("squawksatoo-vs server up at port 3000");
+server.listen(port, () => {
+  console.log(`squawks-vs server up at port ${port}`);
 });

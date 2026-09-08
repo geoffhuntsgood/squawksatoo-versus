@@ -17,7 +17,10 @@ export default defineConfig([
     files: ["**/*.{js,ts,tsx}"],
     languageOptions: {
       ecmaVersion: 2020,
-      globals: globals.browser
+      globals: [
+        ...globals.browser,
+        ...globals.node
+      ]
     },
     rules: {
       "react-hooks/set-state-in-effect": "off"
