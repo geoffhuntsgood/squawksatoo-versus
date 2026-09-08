@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "vite build && cp server\\server.js dist\\",
+    "build": "vite build && cp server/server.js dist/",
     "build:windows": "tsc -b && vite build && xcopy server\\server.js dist\\",
     "server": "node dist/server.js",
     "start": "npm run build && npm run server",
