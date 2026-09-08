@@ -5,9 +5,11 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "tsc -b && vite build && xcopy server\\server.js dist\\",
+    "build": "vite build && cp server\\server.js dist\\",
+    "build:windows": "tsc -b && vite build && xcopy server\\server.js dist\\",
     "server": "node dist/server.js",
     "start": "npm run build && npm run server",
+    "start:windows": "npm run build:windows && npm run server",
     "lint": "eslint .",
     "test": "vitest run --browser.headless",
     "test:watch": "vitest --browser.headless",
