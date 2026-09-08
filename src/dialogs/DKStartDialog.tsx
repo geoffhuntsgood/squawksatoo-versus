@@ -14,36 +14,38 @@ export const DKStartDialog = ({
   open,
   setOpen,
   currentGame,
-  requestedOptions,
+  requested,
   onAcceptAction,
   onDenyAction
 }: {
   open: boolean;
   setOpen: Dispatch<SetStateAction<boolean>>;
   currentGame: GameType;
-  requestedOptions: GameOptions | null;
+  requested: GameOptions | null;
   onAcceptAction: () => void;
   onDenyAction: () => void;
 }) => {
   return (
     <>
-      {requestedOptions && (
+      {requested && (
         <Dialog open={open} onClose={setOpen}>
           <DialogTitle>Start with this config?</DialogTitle>
           <DialogContent>
             <Typography color="textPrimary" variant="h3">
               Another player has requested to start! Their config is:
-              <ul>
-                <li>Count: {requestedOptions.count}</li>
-                <li>Timer: {requestedOptions.timer ? "Yes" : "No"}</li>
-                <li>
-                  Total:{" "}
-                  {currentGame === "DKB"
-                    ? requestedOptions.dkbTotal
-                    : requestedOptions.dk64Total}
-                </li>
-                <li>Seed: {requestedOptions.seed}</li>
-              </ul>
+            </Typography>
+            <Typography color="textPrimary" variant="h3">
+              Count: {requested.count}
+            </Typography>
+            <Typography color="textPrimary" variant="h3">
+              Timer: {requested.timer ? "Yes" : "No"}
+            </Typography>
+            <Typography color="textPrimary" variant="h3">
+              Total:{" "}
+              {currentGame === "DKB" ? requested.dkbTotal : requested.dk64Total}
+            </Typography>
+            <Typography color="textPrimary" variant="h3">
+              Seed: {requested.seed}
             </Typography>
           </DialogContent>
           <DialogActions>

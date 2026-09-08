@@ -24,13 +24,13 @@ describe("App tests", () => {
   test("Start DKB game", async () => {
     const screen = await getScreen();
     await screen.getByRole("button").click();
-    expect(screen.getByText("Reconfigure")).toBeVisible();
+    expect(screen.getByText("Pause")).toBeVisible();
   });
 
   test("Start DK64 game", async () => {
     const screen = await getScreen();
     await screen.getByRole("tab").last().click();
     await screen.getByRole("button").click();
-    expect(screen.getByText("Reconfigure")).toBeVisible();
+    expect(screen.getByText("Pause")).toBeVisible();
   });
 });

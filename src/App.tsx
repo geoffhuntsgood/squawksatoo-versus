@@ -11,7 +11,7 @@ import {
 import { useEffect, useState } from "react";
 import { DK64Item, DKBBanana, GameOptions } from "./classes";
 import { Game, GameConfig } from "./components";
-import { DKRoomDialog, DKStartDialog } from "./dialogs";
+import { DKMessageOnlyDialog, DKRoomDialog, DKStartDialog } from "./dialogs";
 import { DKButton } from "./inputs";
 import { socket } from "./utils/socket";
 import { theme } from "./utils/theme";
@@ -20,6 +20,7 @@ import { type GameType, type LastCollected } from "./utils/types";
 const App = () => {
   const [roomCreateOpen, setRoomCreateOpen] = useState(true);
   const [confirmStartOpen, setRequestStartOpen] = useState(false);
+  const [waitingOpen, setWaitingOpen] = useState(false);
   const [playerName, setPlayerName] = useState("");
   const [roomName, setRoomName] = useState("");
   const [lastCollected, setLastCollected] = useState<LastCollected | null>(
@@ -28,7 +29,9 @@ const App = () => {
 
   const [currentGame, setCurrentGame] = useState<GameType>("DKB");
   const [gameOptions, setGameOptions] = useState<GameOptions | null>(null);
-  const [requestedOptions, setRequestedOptions] = useState<GameOptions | null>(null);
+  const [requestedOptions, setRequestedOptions] = useState<GameOptions | null>(
+    null
+  );
   const [goLabel, setGoLabel] = useState("");
   const [start, setStart] = useState(false);
 
@@ -45,26 +48,30 @@ const App = () => {
   };
 
   const makeStartRequest = () => {
+    setWaitingOpen(true);
     socket.emit("request_start_client", roomName, gameOptions);
   };
 
   const denyStart = () => {
     setRequestStartOpen(false);
+    setWaitingOpen(false);
     socket.emit("deny_start_client", roomName);
   };
 
   const confirmStartRequest = () => {
     socket.emit("start_client", roomName);
     setGameOptions(requestedOptions);
+    setWaitingOpen(false);
     setStart(true);
   };
 
   useEffect(() => {
+    socket.on("set_game_server", (game: GameType) => setCurrentGame(game));
     socket.on("collected_server", updateLastItem);
     socket.on("start_server", () => setStart(true));
     socket.on("request_start_server", (options: GameOptions) => {
       setRequestedOptions(options);
-      setRequestStartOpen(true)
+      setRequestStartOpen(true);
     });
     socket.on("deny_start_server", () => setRequestStartOpen(false));
 
@@ -105,11 +112,18 @@ const App = () => {
             }}
           />
 
+          <DKMessageOnlyDialog
+            open={waitingOpen}
+            setOpen={setWaitingOpen}
+            title="Waiting"
+            message="Request to start sent! Waiting on other players..."
+          />
+
           <DKStartDialog
             open={confirmStartOpen}
             setOpen={setRequestStartOpen}
             currentGame={currentGame}
-            requestedOptions={requestedOptions}
+            requested={requestedOptions}
             onAcceptAction={confirmStartRequest}
             onDenyAction={denyStart}
           />
@@ -134,7 +148,10 @@ const App = () => {
           <Tabs
             centered
             value={currentGame}
-            onChange={(_, newValue) => setCurrentGame(newValue)}
+            onChange={(_, newValue) => {
+              socket.emit("set_game_client", roomName, newValue);
+              setCurrentGame(newValue);
+            }}
           >
             <Tab label="DKB" value="DKB" />
             <Tab label="DK64" value="DK64" />
@@ -147,13 +164,11 @@ const App = () => {
           />
 
           <Box sx={{ textAlign: "center" }}>
-            <DKButton
-              label={goLabel}
-              handleClick={makeStartRequest}
-            />
+            <DKButton label={goLabel} handleClick={makeStartRequest} />
           </Box>
         </>
       )}
+
       {socket.connected && start && gameOptions && (
         <Game
           options={gameOptions}

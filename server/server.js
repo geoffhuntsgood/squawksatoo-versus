@@ -29,6 +29,10 @@ io.on("connection", (socket) => {
     socket.join(roomName);
   });
 
+  socket.on("set_game_client", (roomName, game) => {
+    socket.to(roomName).emit("set_game_server", game);
+  });
+
   socket.on("start_client", (roomName) => {
     socket.to(roomName).emit("start_server");
   });
@@ -51,10 +55,6 @@ io.on("connection", (socket) => {
 
   socket.on("resume_client", (roomName) => {
     socket.to(roomName).emit("resume_server");
-  });
-
-  socket.on("reconfig_client", (roomName) => {
-    socket.to(roomName).emit("reconfig_server");
   });
 
   socket.on("collected_client", (item, index, playerId, roomName) => {

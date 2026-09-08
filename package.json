@@ -25,6 +25,7 @@
     "random": "^5.4.1",
     "react": "^19.2.8",
     "react-dom": "^19.2.8",
+    "react-loader-spinner": "^8.0.2",
     "react-rewards": "^2.1.0",
     "react-timer-hook": "^4.0.6",
     "socket.io": "^4.8.3",

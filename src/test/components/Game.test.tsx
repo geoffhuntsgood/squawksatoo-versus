@@ -40,7 +40,7 @@ describe("Game tests", () => {
     );
   };
 
-  test("Check game with seed and no autoRefresh", async () => {
+  test("Check game with seed", async () => {
     const screen = await getScreen(5, 10, "Seed", true, japes.items);
     expect(screen.getByText("Go get 'em!")).toBeVisible();
     expect(screen.getByText("Japes Tunnel Fairy")).toBeVisible();
@@ -53,25 +53,6 @@ describe("Game tests", () => {
 
     expect(screen.getByText("GG!")).toBeVisible();
     expect(screen.getByText("5")).toBeVisible();
-  });
-
-  test("Check game with seed and autoRefresh (with reset)", async () => {
-    const screen = await getScreen(1, 10, "Seed", false, japes.items);
-    expect(screen.getByText("10 left")).toBeVisible();
-    expect(screen.getByText("Japes Tunnel Fairy")).toBeVisible();
-
-    await screen.getByText("Japes Tunnel Fairy").click();
-
-    expect(screen.getByText("Japes Tunnel Fairy")).not.toBeInTheDocument();
-    expect(screen.getByText("Japes Mountaintop GB")).toBeVisible();
-
-    await screen.getByText("RECONFIGURE").click();
-    await screen.getByText("NAH").click();
-    await screen.getByText("RECONFIGURE").click();
-    await screen.getByText("YEAH").click();
-
-    expect(setOptionsMock).toHaveBeenCalledWith(null);
-    expect(setStartMock).toHaveBeenCalledWith(false);
   });
 
   test("Pause/resume and reset completed game", async () => {
@@ -89,11 +70,9 @@ describe("Game tests", () => {
       "animation: completeCounter 2s infinite"
     );
     await screen.getByText("RESUME").click();
-
     await screen.getByText("Nintendo Coin").click();
-    await screen.getByText("RECONFIGURE").click();
+    await screen.getByText("Play again?").click();
 
-    expect(screen.getByText("YEAH")).not.toBeInTheDocument();
     expect(setOptionsMock).toHaveBeenCalledWith(null);
     expect(setStartMock).toHaveBeenCalledWith(false);
   });

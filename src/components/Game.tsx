@@ -4,7 +4,6 @@ import { useEffect, useState, type Dispatch, type SetStateAction } from "react";
 import { useStopwatch } from "react-timer-hook";
 import type { Socket } from "socket.io-client";
 import type { DK64Item, DKBBanana, GameOptions } from "../classes";
-import { DKResetDialog } from "../dialogs";
 import { DK64Category } from "../enums";
 import { DKButton, DKHR, DKItemRow } from "../inputs";
 import type { LastCollected } from "../utils/types";
@@ -29,7 +28,6 @@ export const Game = ({
   playerName: string;
   roomName: string;
 }) => {
-  const [reconfigOpen, setReconfigOpen] = useState(false);
   const [available, setAvailable] = useState<(DK64Item | DKBBanana)[]>([]);
   const [displayed, setDisplayed] = useState<(DK64Item | DKBBanana)[]>([]);
   const [completed, setCompleted] = useState<(DK64Item | DKBBanana)[]>([]);
@@ -141,24 +139,16 @@ export const Game = ({
   useEffect(() => {
     socket.on("pause_server", () => stopwatch.pause());
     socket.on("resume_server", () => stopwatch.start());
-    socket.on("reconfig_server", reset);
 
     return () => {
       socket.off("pause_server");
       socket.off("resume_server");
-      socket.off("reconfig_server");
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return (
     <Grid container spacing={1}>
-      <DKResetDialog
-        open={reconfigOpen}
-        setOpen={setReconfigOpen}
-        handleCancelAction={() => stopwatch.start()}
-      />
-
       <GameHeader
         timer={options.timer}
         stopwatch={stopwatch}
@@ -189,13 +179,9 @@ export const Game = ({
         />
       )}
 
-      <DKButton
-        label="Reconfigure"
-        handleClick={() => {
-          reset();
-          socket.emit("reconfig_client", roomName);
-        }}
-      />
+      {completed.length === total && (
+        <DKButton label="Play again?" handleClick={() => reset()} />
+      )}
     </Grid>
   );
 };
