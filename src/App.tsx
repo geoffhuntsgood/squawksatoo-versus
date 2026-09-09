@@ -1,4 +1,3 @@
-import { RotateLeft } from "@mui/icons-material";
 import {
   Box,
   Card,
@@ -128,7 +127,7 @@ const App = () => {
                 sx={{ color: "white", marginLeft: "-1rem" }}
                 onClick={() => setRoomCreateOpen(true)}
               >
-                <RotateLeft />
+                ↩
               </IconButton>
             </span>
           )}

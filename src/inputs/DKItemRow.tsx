@@ -1,4 +1,3 @@
-import CheckCircle from "@mui/icons-material/CheckCircle";
 import { Grid, IconButton, Typography } from "@mui/material";
 import type { MouseEventHandler } from "react";
 
@@ -27,7 +26,7 @@ export const DKItemRow = ({
     <Grid size={12}>
       <Typography color="textPrimary" variant="h3" sx={styles.text}>
         <IconButton sx={styles.check} onClick={onComplete} disabled={disabled}>
-          <CheckCircle />
+          ✔
         </IconButton>
         <span
           style={{
