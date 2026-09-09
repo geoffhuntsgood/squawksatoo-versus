@@ -152,7 +152,7 @@ export const GameConfig = ({
 
   useEffect(() => {
     setGoLabel(
-      `Get ${config.count}/${currentGame === "DKB" ? config.dkbTotal : config.dk64Total}`
+      `Get ${currentGame === "DKB" ? `${config.dkbTotal} bananas` : `${config.dk64Total} items`}`
     );
     setOptions({
       ...config,
@@ -245,6 +245,7 @@ export const GameConfig = ({
           )}
 
           <DKTextBox
+            required
             label="Seed"
             value={config.seed}
             handleChange={(val) => setConfig({ ...config, seed: String(val) })}

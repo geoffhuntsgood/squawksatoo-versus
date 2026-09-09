@@ -4,11 +4,13 @@ import type { ChangeEvent, Dispatch, SetStateAction } from "react";
 export const DKTextBox = ({
   label,
   value,
-  handleChange
+  handleChange,
+  required
 }: {
   label: string;
   value: string;
   handleChange: Dispatch<SetStateAction<string>>;
+  required?: boolean;
 }) => (
   <TextField
     slotProps={{
@@ -16,6 +18,7 @@ export const DKTextBox = ({
         maxLength: "10"
       }
     }}
+    required={required}
     variant="outlined"
     label={label}
     value={value}

@@ -7,3 +7,5 @@ export type LastCollected = {
   index: number;
   playerId: string;
 };
+
+export type ItemWithPlayerId = (DK64Item | DKBBanana) & { playerId: string };

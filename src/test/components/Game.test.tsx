@@ -10,7 +10,6 @@ import { socket } from "../../utils/socket";
 describe("Game tests", () => {
   const setOptionsMock = vi.fn();
   const setStartMock = vi.fn();
-  const setLastCollectedMock = vi.fn();
 
   const getScreen = (
     count: number,
@@ -29,11 +28,10 @@ describe("Game tests", () => {
           timer,
           collectables
         }}
+        players={["Geoff"]}
         setOptions={setOptionsMock}
         setStart={setStartMock}
         socket={socket}
-        lastCollected={null}
-        setLastCollected={setLastCollectedMock}
         playerName="Test Player"
         roomName="TestRoom"
       />
@@ -71,7 +69,7 @@ describe("Game tests", () => {
     );
     await screen.getByText("RESUME").click();
     await screen.getByText("Nintendo Coin").click();
-    await screen.getByText("Play again?").click();
+    await screen.getByText("Restart").click();
 
     expect(setOptionsMock).toHaveBeenCalledWith(null);
     expect(setStartMock).toHaveBeenCalledWith(false);

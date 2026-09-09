@@ -32,7 +32,10 @@ export const DKStartDialog = ({
           <DialogTitle>Start with this config?</DialogTitle>
           <DialogContent>
             <Typography color="textPrimary" variant="h3">
-              Another player has requested to start! Their config is:
+              Another player has requested to start!
+            </Typography>
+            <Typography color="textPrimary" variant="h3">
+              Their config is:
             </Typography>
             <Typography color="textPrimary" variant="h3">
               Count: {requested.count}

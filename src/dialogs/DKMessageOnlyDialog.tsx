@@ -18,12 +18,14 @@ export const DKMessageOnlyDialog = ({
     <DialogContent>
       <Typography color="textPrimary" variant="h3">
         {message}
+        <Puff
+          visible
+          color="#F00"
+          wrapperStyle={{
+            padding: "1rem"
+          }}
+        />
       </Typography>
-      <Puff
-        visible
-        color="#F00"
-        wrapperStyle={{ margin: "0 auto", padding: "1rem" }}
-      />
     </DialogContent>
   </Dialog>
 );

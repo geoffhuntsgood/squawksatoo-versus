@@ -4,51 +4,57 @@ import {
   DialogContent,
   DialogTitle
 } from "@mui/material";
-import { type Dispatch, type SetStateAction } from "react";
+import { useState, type Dispatch, type SetStateAction } from "react";
+import { Socket } from "socket.io-client";
 import { DKButton } from "../inputs/DKButton";
 import { DKTextBox } from "../inputs/DKTextBox";
 
 export const DKRoomDialog = ({
   open,
   setOpen,
-  playerName,
   setPlayerName,
-  roomName,
   setRoomName,
-  onCloseAction
+  socket
 }: {
   open: boolean;
   setOpen: Dispatch<SetStateAction<boolean>>;
-  playerName: string;
   setPlayerName: Dispatch<SetStateAction<string>>;
-  roomName: string;
   setRoomName: Dispatch<SetStateAction<string>>;
-  onCloseAction: () => void;
-}) => (
-  <Dialog open={open} onClose={setOpen}>
-    <DialogTitle>Join a Room</DialogTitle>
-    <DialogContent>
-      <DKTextBox
-        label="Player Name"
-        value={playerName}
-        handleChange={setPlayerName}
-      />
-      <DKTextBox
-        label="Room Name"
-        value={roomName}
-        handleChange={setRoomName}
-      />
-    </DialogContent>
-    <DialogActions>
-      {playerName && roomName && (
-        <DKButton
-          label="Go!"
-          handleClick={() => {
-            onCloseAction();
-            setOpen(false);
-          }}
+  socket: Socket;
+}) => {
+  const [id, setId] = useState("");
+  const [room, setRoom] = useState("");
+
+  return (
+    <Dialog open={open} onClose={setOpen}>
+      <DialogTitle>Join a Room</DialogTitle>
+      <DialogContent>
+        <DKTextBox
+          required
+          label="Player Name"
+          value={id}
+          handleChange={(val) => setId(String(val).trim())}
         />
-      )}
-    </DialogActions>
-  </Dialog>
-);
+        <DKTextBox
+          required
+          label="Room Name"
+          value={room}
+          handleChange={(val) => setRoom(String(val).trim())}
+        />
+      </DialogContent>
+      <DialogActions>
+        {id && room && (
+          <DKButton
+            label="Go!"
+            handleClick={() => {
+              socket.emit("join_room_client", id, room);
+              setPlayerName(id);
+              setRoomName(room);
+              setOpen(false);
+            }}
+          />
+        )}
+      </DialogActions>
+    </Dialog>
+  );
+};

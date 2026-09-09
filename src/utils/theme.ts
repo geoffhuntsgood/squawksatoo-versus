@@ -10,7 +10,7 @@ export const theme = createTheme({
     MuiButton: {
       styleOverrides: {
         contained: {
-          width: "10rem",
+          width: "20rem",
           margin: "0 auto",
           padding: "0 1rem",
           fontSize: "2rem",
@@ -51,6 +51,13 @@ export const theme = createTheme({
       styleOverrides: {
         paper: {
           backgroundColor: menuBG
+        }
+      }
+    },
+    MuiDialogActions: {
+      styleOverrides: {
+        root: {
+          padding: "1rem"
         }
       }
     },

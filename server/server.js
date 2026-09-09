@@ -26,7 +26,8 @@ io.on("connection", (socket) => {
     console.log("A user disconnected!");
   });
 
-  socket.on("join_room_client", (roomName) => {
+  socket.on("join_room_client", (playerId, roomName) => {
+    socket.data.playerId = playerId;
     socket.join(roomName);
   });
 
@@ -35,7 +36,16 @@ io.on("connection", (socket) => {
   });
 
   socket.on("start_client", (roomName) => {
-    socket.to(roomName).emit("start_server");
+    io.in(roomName)
+      .fetchSockets()
+      .then((sockets) => {
+        sockets.forEach((s) => {
+          s.emit(
+            "start_server",
+            sockets.map((sock) => sock.data.playerId)
+          );
+        });
+      });
   });
 
   socket.on("request_start_client", (roomName, gameOptions) => {
@@ -60,6 +70,10 @@ io.on("connection", (socket) => {
 
   socket.on("collected_client", (item, index, playerId, roomName) => {
     socket.to(roomName).emit("collected_server", item, index, playerId);
+  });
+
+  socket.on("reset_client", (roomName) => {
+    socket.to(roomName).emit("reset_server");
   });
 });
 

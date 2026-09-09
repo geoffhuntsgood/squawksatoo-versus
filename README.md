@@ -26,6 +26,6 @@ Selecting a level will generate categories based on the available items in that 
 
 ## Playing the Game
 
-**Header:** If auto-refresh was selected, the header will display the remaining number of bananas in the configured list.
+**Header:** The header will display the remaining number of bananas in the configured list.
 
-**Item List:** Clicking the check next to a displayed item will add it to the "correct" counter. (Clicking the text will do the same.)
+**Item List:** Clicking the check next to a displayed item will add it to the counter with your name. (Clicking the text will do the same.)

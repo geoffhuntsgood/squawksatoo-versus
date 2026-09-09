@@ -6,7 +6,7 @@ import type { Socket } from "socket.io-client";
 import type { DK64Item, DKBBanana, GameOptions } from "../classes";
 import { DK64Category } from "../enums";
 import { DKButton, DKHR, DKItemRow } from "../inputs";
-import type { LastCollected } from "../utils/types";
+import type { ItemWithPlayerId, LastCollected } from "../utils/types";
 import { GameHeader } from "./GameHeader";
 
 export const Game = ({
@@ -14,23 +14,24 @@ export const Game = ({
   setOptions,
   setStart,
   socket,
-  lastCollected,
-  setLastCollected,
   playerName,
-  roomName
+  roomName,
+  players
 }: {
   options: GameOptions;
   setOptions: Dispatch<SetStateAction<GameOptions | null>>;
   setStart: Dispatch<SetStateAction<boolean>>;
   socket: Socket;
-  lastCollected: LastCollected | null;
-  setLastCollected: Dispatch<SetStateAction<LastCollected | null>>;
   playerName: string;
   roomName: string;
+  players: string[];
 }) => {
   const [available, setAvailable] = useState<(DK64Item | DKBBanana)[]>([]);
   const [displayed, setDisplayed] = useState<(DK64Item | DKBBanana)[]>([]);
-  const [completed, setCompleted] = useState<(DK64Item | DKBBanana)[]>([]);
+  const [completed, setCompleted] = useState<ItemWithPlayerId[]>([]);
+  const [lastCollected, setLastCollected] = useState<LastCollected | null>(
+    null
+  );
 
   const stopwatch = useStopwatch({ autoStart: true, interval: 20 });
 
@@ -56,16 +57,32 @@ export const Game = ({
   const onComplete = (
     item: DK64Item | DKBBanana,
     index: number,
+    playerId: string,
     emit: boolean
   ) => {
     const done = [...completed];
-    done.push(item);
+    done.push({
+      ...item,
+      playerId
+    });
     setCompleted(done);
     replaceItem(index);
 
     if (emit) {
-      socket.emit("collected_client", item, index, playerName, roomName);
+      socket.emit("collected_client", item, index, playerId, roomName);
     }
+  };
+
+  const updateLastItem = (
+    item: DK64Item | DKBBanana,
+    index: number,
+    playerId: string
+  ) => {
+    setLastCollected({
+      item,
+      index,
+      playerId
+    });
   };
 
   const reset = () => {
@@ -86,7 +103,12 @@ export const Game = ({
 
   useEffect(() => {
     if (lastCollected && playerName && lastCollected.playerId !== playerName) {
-      onComplete(lastCollected.item, lastCollected.index, false);
+      onComplete(
+        lastCollected.item,
+        lastCollected.index,
+        lastCollected.playerId,
+        false
+      );
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [lastCollected]);
@@ -137,12 +159,16 @@ export const Game = ({
   }, []);
 
   useEffect(() => {
-    socket.on("pause_server", () => stopwatch.pause());
-    socket.on("resume_server", () => stopwatch.start());
+    socket.on("collected_server", updateLastItem);
+    socket.on("pause_server", stopwatch.pause);
+    socket.on("resume_server", stopwatch.start);
+    socket.on("reset_server", reset);
 
     return () => {
+      socket.off("collected_server");
       socket.off("pause_server");
       socket.off("resume_server");
+      socket.off("reset_server");
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -153,22 +179,21 @@ export const Game = ({
         timer={options.timer}
         stopwatch={stopwatch}
         total={total}
-        completed={completed.length}
+        completed={completed}
+        players={players}
       />
 
       <DKHR />
 
       {displayed.length > 0 &&
-        displayed.map((item: DK64Item | DKBBanana, index: number) => {
-          return (
-            <DKItemRow
-              key={index}
-              name={item.name}
-              disabled={completed.indexOf(item) !== -1}
-              onComplete={() => onComplete(item, index, true)}
-            />
-          );
-        })}
+        displayed.map((item: DK64Item | DKBBanana, index: number) => (
+          <DKItemRow
+            key={index}
+            name={item.name}
+            disabled={completed.findIndex((c) => c.name === item.name) !== -1}
+            onComplete={() => onComplete(item, index, playerName, true)}
+          />
+        ))}
 
       <DKHR />
 
@@ -180,7 +205,13 @@ export const Game = ({
       )}
 
       {completed.length === total && (
-        <DKButton label="Play again?" handleClick={() => reset()} />
+        <DKButton
+          label="Restart"
+          handleClick={() => {
+            socket.emit("reset_client", roomName);
+            reset();
+          }}
+        />
       )}
     </Grid>
   );

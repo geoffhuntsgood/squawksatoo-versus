@@ -1,20 +1,22 @@
-import { CheckCircle } from "@mui/icons-material";
-import { Grid, IconButton, Typography } from "@mui/material";
+import { Grid, Typography } from "@mui/material";
 import { useEffect, useState } from "react";
 import { useReward } from "react-rewards";
 import type { useStopwatchResultType } from "react-timer-hook/dist/types/src/useStopwatch";
 import { DKTimer } from "../inputs";
+import { ItemWithPlayerId } from "../utils/types";
 
 export const GameHeader = ({
   timer,
   stopwatch,
   total,
-  completed
+  completed,
+  players
 }: {
   timer: boolean;
   stopwatch: useStopwatchResultType;
   total: number;
-  completed: number;
+  completed: ItemWithPlayerId[];
+  players: string[];
 }) => {
   const [header, setHeader] = useState("Go get 'em!");
 
@@ -43,13 +45,13 @@ export const GameHeader = ({
     : { color: "white" };
 
   useEffect(() => {
-    if (completed !== 0 && completed === total) {
+    if (completed.length !== 0 && completed.length === total) {
       stopwatch.pause();
       setHeader("GG!");
       rewardLeft();
       rewardRight();
     } else {
-      setHeader(`${total - completed} left`);
+      setHeader(`${total - completed.length} left`);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [completed, total]);
@@ -63,12 +65,11 @@ export const GameHeader = ({
         <div id="rewardLeft" />
       </Grid>
       <Grid size={timer ? 4 : 6}>
-        <Typography color="textPrimary" variant="h1" sx={rightAnimate}>
-          <IconButton sx={rightAnimate}>
-            <CheckCircle />
-          </IconButton>
-          {completed}
-        </Typography>
+        {players.map((player: string) => (
+          <Typography color="textPrimary" variant="h3" sx={rightAnimate}>
+            {player}: {completed.filter((c) => c.playerId === player).length}
+          </Typography>
+        ))}
       </Grid>
       <Grid size={4}>
         {timer && <DKTimer stopwatch={stopwatch} />}

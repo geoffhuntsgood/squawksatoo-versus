@@ -9,23 +9,21 @@ import {
   Typography
 } from "@mui/material";
 import { useEffect, useState } from "react";
-import { DK64Item, DKBBanana, GameOptions } from "./classes";
+import { GameOptions } from "./classes";
 import { Game, GameConfig } from "./components";
 import { DKMessageOnlyDialog, DKRoomDialog, DKStartDialog } from "./dialogs";
 import { DKButton } from "./inputs";
 import { socket } from "./utils/socket";
 import { theme } from "./utils/theme";
-import { type GameType, type LastCollected } from "./utils/types";
+import { type GameType } from "./utils/types";
 
 const App = () => {
   const [roomCreateOpen, setRoomCreateOpen] = useState(true);
-  const [confirmStartOpen, setRequestStartOpen] = useState(false);
+  const [confirmStartOpen, setConfirmStartOpen] = useState(false);
   const [waitingOpen, setWaitingOpen] = useState(false);
   const [playerName, setPlayerName] = useState("");
   const [roomName, setRoomName] = useState("");
-  const [lastCollected, setLastCollected] = useState<LastCollected | null>(
-    null
-  );
+  const [players, setPlayers] = useState<string[]>([]);
 
   const [currentGame, setCurrentGame] = useState<GameType>("DKB");
   const [gameOptions, setGameOptions] = useState<GameOptions | null>(null);
@@ -35,27 +33,15 @@ const App = () => {
   const [goLabel, setGoLabel] = useState("");
   const [start, setStart] = useState(false);
 
-  const updateLastItem = (
-    item: DK64Item | DKBBanana,
-    index: number,
-    playerId: string
-  ) => {
-    setLastCollected({
-      item,
-      index,
-      playerId
-    });
-  };
-
   const makeStartRequest = () => {
-    setWaitingOpen(true);
     socket.emit("request_start_client", roomName, gameOptions);
+    setWaitingOpen(true);
   };
 
   const denyStart = () => {
-    setRequestStartOpen(false);
-    setWaitingOpen(false);
     socket.emit("deny_start_client", roomName);
+    setConfirmStartOpen(false);
+    setWaitingOpen(false);
   };
 
   const confirmStartRequest = () => {
@@ -67,16 +53,22 @@ const App = () => {
 
   useEffect(() => {
     socket.on("set_game_server", (game: GameType) => setCurrentGame(game));
-    socket.on("collected_server", updateLastItem);
-    socket.on("start_server", () => setStart(true));
+    socket.on("start_server", (players: string[]) => {
+      setPlayers(players);
+      setWaitingOpen(false);
+      setStart(true);
+    });
     socket.on("request_start_server", (options: GameOptions) => {
       setRequestedOptions(options);
-      setRequestStartOpen(true);
+      setConfirmStartOpen(true);
     });
-    socket.on("deny_start_server", () => setRequestStartOpen(false));
+    socket.on("deny_start_server", () => {
+      setWaitingOpen(false);
+      setConfirmStartOpen(false);
+    });
 
     return () => {
-      socket.off("collected_server");
+      socket.off("set_game_server");
       socket.off("start_server");
       socket.off("request_start_server");
       socket.off("deny_start_server");
@@ -103,13 +95,9 @@ const App = () => {
           <DKRoomDialog
             open={roomCreateOpen}
             setOpen={setRoomCreateOpen}
-            playerName={playerName}
             setPlayerName={setPlayerName}
-            roomName={roomName}
             setRoomName={setRoomName}
-            onCloseAction={() => {
-              socket.emit("join_room_client", roomName);
-            }}
+            socket={socket}
           />
 
           <DKMessageOnlyDialog
@@ -121,7 +109,7 @@ const App = () => {
 
           <DKStartDialog
             open={confirmStartOpen}
-            setOpen={setRequestStartOpen}
+            setOpen={setConfirmStartOpen}
             currentGame={currentGame}
             requested={requestedOptions}
             onAcceptAction={confirmStartRequest}
@@ -175,10 +163,9 @@ const App = () => {
           setOptions={setGameOptions}
           setStart={setStart}
           socket={socket}
-          lastCollected={lastCollected}
-          setLastCollected={setLastCollected}
           playerName={playerName}
           roomName={roomName}
+          players={players}
         />
       )}
     </ThemeProvider>
