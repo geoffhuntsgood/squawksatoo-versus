@@ -51,7 +51,8 @@ export const GameHeader = ({
       rewardLeft();
       rewardRight();
     } else {
-      setHeader(`${total - completed.length} left`);
+      const display = total - completed.length;
+      setHeader(`${display < 0 ? 0 : display} left`);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [completed, total]);
