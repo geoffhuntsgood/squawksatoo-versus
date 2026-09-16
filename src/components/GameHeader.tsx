@@ -1,22 +1,23 @@
 import { Grid, Typography } from "@mui/material";
-import { useEffect, useState } from "react";
+import { Dispatch, SetStateAction, useEffect, useState } from "react";
 import { useReward } from "react-rewards";
-import type { useStopwatchResultType } from "react-timer-hook/dist/types/src/useStopwatch";
 import { DKTimer } from "../inputs";
 import { ItemWithPlayerId } from "../utils/types";
 
 export const GameHeader = ({
   timer,
-  stopwatch,
   total,
   completed,
-  players
+  players,
+  shouldBePaused,
+  setShouldBePaused
 }: {
   timer: boolean;
-  stopwatch: useStopwatchResultType;
   total: number;
   completed: ItemWithPlayerId[];
   players: string[];
+  shouldBePaused: boolean;
+  setShouldBePaused: Dispatch<SetStateAction<boolean>>;
 }) => {
   const [header, setHeader] = useState("Go get 'em!");
 
@@ -40,13 +41,9 @@ export const GameHeader = ({
     rewardSettings
   );
 
-  const rightAnimate = !stopwatch.isRunning
-    ? { animation: "completeCounter 2s infinite" }
-    : { color: "white" };
-
   useEffect(() => {
     if (completed.length !== 0 && completed.length === total) {
-      stopwatch.pause();
+      setShouldBePaused(true);
       setHeader("GG!");
       rewardLeft();
       rewardRight();
@@ -67,13 +64,21 @@ export const GameHeader = ({
       </Grid>
       <Grid size={timer ? 4 : 6}>
         {players.map((player: string) => (
-          <Typography color="textPrimary" variant="h3" sx={rightAnimate}>
+          <Typography
+            color="textPrimary"
+            variant="h3"
+            sx={
+              shouldBePaused
+                ? { animation: "completeCounter 2s infinite" }
+                : { color: "white" }
+            }
+          >
             {player}: {completed.filter((c) => c.playerId === player).length}
           </Typography>
         ))}
       </Grid>
       <Grid size={4}>
-        {timer && <DKTimer stopwatch={stopwatch} />}
+        {timer && <DKTimer shouldBePaused={shouldBePaused} />}
         <div id="rewardRight" style={{ float: "right" }} />
       </Grid>
     </>

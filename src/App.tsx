@@ -151,7 +151,12 @@ const App = () => {
           />
 
           <Box sx={{ textAlign: "center" }}>
-            <DKButton label={goLabel} handleClick={makeStartRequest} />
+            <DKButton
+              label={goLabel}
+              handleClick={makeStartRequest}
+              disabled={gameOptions ? !gameOptions.seed : false}
+              infoText="A seed is required!"
+            />
           </Box>
         </>
       )}

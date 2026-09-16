@@ -1,5 +1,6 @@
-import { describe, expect, test } from "vitest";
-import { render } from "vitest-browser-react";
+import { beforeEach, describe, expect, test } from "vitest";
+import { render, RenderResult } from "vitest-browser-react";
+import { userEvent } from "vitest/browser";
 import App from "../App";
 
 describe("App tests", () => {
@@ -7,30 +8,36 @@ describe("App tests", () => {
     return render(<App />);
   };
 
+  let screen: RenderResult;
+
+  beforeEach(async () => {
+    screen = await getScreen();
+    await userEvent.type(screen.getByText("Player Name *").first(), "Geoff");
+    await userEvent.type(screen.getByText("Room Name *").first(), "12345");
+    await screen.getByText("Go!").click();
+  });
+
   test("Check initial render", async () => {
-    expect((await getScreen()).getByText("Squawksatoo")).toBeVisible();
+    expect(screen.getByText("Squawksatoo VS")).toBeVisible();
   });
 
   test("DKB config tab", async () => {
-    expect((await getScreen()).getByText("Layer").last()).toBeVisible();
+    expect(screen.getByText("Layer").last()).toBeVisible();
   });
 
   test("DK64 config tab", async () => {
-    const screen = await getScreen();
     await screen.getByRole("tab").last().click();
     expect(screen.getByText("Level").last()).toBeVisible();
   });
 
   test("Start DKB game", async () => {
-    const screen = await getScreen();
-    await screen.getByRole("button").click();
-    expect(screen.getByText("Pause")).toBeVisible();
+    await screen.getByText("Get 43 bananas").click();
+    expect(screen.getByText("Waiting")).toBeVisible();
   });
 
   test("Start DK64 game", async () => {
-    const screen = await getScreen();
     await screen.getByRole("tab").last().click();
-    await screen.getByRole("button").click();
-    expect(screen.getByText("Pause")).toBeVisible();
+    await screen.getByText("Get 370 items").click();
+    expect(screen.getByText("Waiting")).toBeVisible();
   });
 });

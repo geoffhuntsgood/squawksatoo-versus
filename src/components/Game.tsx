@@ -1,7 +1,6 @@
 import { Grid } from "@mui/material";
 import random from "random";
 import { useEffect, useState, type Dispatch, type SetStateAction } from "react";
-import { useStopwatch } from "react-timer-hook";
 import type { Socket } from "socket.io-client";
 import type { DK64Item, DKBBanana, GameOptions } from "../classes";
 import { DK64Category } from "../enums";
@@ -32,8 +31,7 @@ export const Game = ({
   const [lastCollected, setLastCollected] = useState<LastCollected | null>(
     null
   );
-
-  const stopwatch = useStopwatch({ autoStart: true, interval: 20 });
+  const [shouldBePaused, setShouldBePaused] = useState<boolean>(false);
 
   const total = (Object.values(DK64Category) as string[]).includes(
     options.collectables[0].category
@@ -89,16 +87,6 @@ export const Game = ({
     setOptions(null);
     setLastCollected(null);
     setStart(false);
-  };
-
-  const pauseAll = () => {
-    stopwatch.pause();
-    socket.emit("pause_client", roomName);
-  };
-
-  const resumeAll = () => {
-    stopwatch.start();
-    socket.emit("resume_client", roomName);
   };
 
   useEffect(() => {
@@ -160,8 +148,8 @@ export const Game = ({
 
   useEffect(() => {
     socket.on("collected_server", updateLastItem);
-    socket.on("pause_server", stopwatch.pause);
-    socket.on("resume_server", stopwatch.start);
+    socket.on("pause_server", () => setShouldBePaused(true));
+    socket.on("resume_server", () => setShouldBePaused(false));
     socket.on("reset_server", reset);
 
     return () => {
@@ -177,10 +165,11 @@ export const Game = ({
     <Grid container spacing={1}>
       <GameHeader
         timer={options.timer}
-        stopwatch={stopwatch}
         total={total}
         completed={completed}
         players={players}
+        shouldBePaused={shouldBePaused}
+        setShouldBePaused={setShouldBePaused}
       />
 
       <DKHR />
@@ -190,6 +179,7 @@ export const Game = ({
           <DKItemRow
             key={index}
             name={item.name}
+            shouldBePaused={shouldBePaused}
             disabled={completed.findIndex((c) => c.name === item.name) !== -1}
             onComplete={() => onComplete(item, index, playerName, true)}
           />
@@ -199,8 +189,16 @@ export const Game = ({
 
       {options.timer && completed.length < total && (
         <DKButton
-          label={stopwatch.isRunning ? "Pause" : "Resume"}
-          handleClick={() => (stopwatch.isRunning ? pauseAll() : resumeAll())}
+          label={shouldBePaused ? "Resume" : "Pause"}
+          handleClick={() => {
+            if (!shouldBePaused) {
+              setShouldBePaused(true);
+              socket.emit("pause_client", roomName);
+            } else {
+              setShouldBePaused(false);
+              socket.emit("resume_client", roomName);
+            }
+          }}
         />
       )}
 

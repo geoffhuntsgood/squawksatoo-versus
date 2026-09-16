@@ -1,47 +1,45 @@
-import { useStopwatch } from "react-timer-hook";
-import type { useStopwatchResultType } from "react-timer-hook/dist/types/src/useStopwatch";
-import { describe, expect, test } from "vitest";
-import { render, renderHook } from "vitest-browser-react";
+import { describe, expect, test, vi } from "vitest";
+import { render } from "vitest-browser-react";
 import { GameHeader } from "../../components";
 import { DK64Category } from "../../enums";
 import { ItemWithPlayerId } from "../../utils/types";
 
 describe("GameHeader tests", async () => {
-  const getStopwatch = async (isRunning: boolean) =>
-    await renderHook(() => useStopwatch({ autoStart: isRunning }));
+  const setShouldBePausedMock = vi.fn();
 
   const getScreen = (
     timer: boolean,
-    stopwatch: useStopwatchResultType,
     total: number,
-    completed: ItemWithPlayerId[]
+    completed: ItemWithPlayerId[],
+    shouldBePaused: boolean
   ) => {
     return render(
       <GameHeader
         timer={timer}
-        stopwatch={stopwatch}
         total={total}
         completed={completed}
         players={["Geoff"]}
+        shouldBePaused={shouldBePaused}
+        setShouldBePaused={setShouldBePausedMock}
       />
     );
   };
 
   test("Check initial render with completion", async () => {
-    const watch = (await getStopwatch(false)).result.current;
-    const screen = await getScreen(false, watch, 1, [
+    const completed = [
       {
         name: "Test",
         category: DK64Category.Blueprint,
         playerId: "Geoff"
       }
-    ]);
+    ];
+
+    const screen = await getScreen(false, 1, completed, true);
     expect(screen.getByText("GG!")).toBeInTheDocument();
   });
 
   test("Check in progress game", async () => {
-    const watch = (await getStopwatch(false)).result.current;
-    const screen = await getScreen(false, watch, 3, []);
+    const screen = await getScreen(false, 3, [], false);
     expect(screen.getByText("3 left")).toBeInTheDocument();
   });
 });

@@ -5,24 +5,24 @@ import { DKCheckbox } from "../../inputs";
 describe("DKCheckbox tests", () => {
   const checkMock = vi.fn();
 
-  const getScreen = () => {
+  const getScreen = (withTooltip: boolean) => {
     return render(
       <DKCheckbox
         label="Test Checkbox"
         checked={true}
         handleChange={checkMock}
-        helpText="Test Tooltip"
+        helpText={withTooltip ? "Test Tooltip" : ""}
       />
     );
   };
 
-  test("Check initial render", async () => {
-    const screen = await getScreen();
-    expect(screen.getByText("Test Checkbox")).toBeVisible();
+  test("Check initial render with tooltip", async () => {
+    const screen = await getScreen(true);
+    expect(screen.getByText("Test Checkbox?")).toBeVisible();
   });
 
-  test("Check action trigger", async () => {
-    const screen = await getScreen();
+  test("Check action trigger (no tooltip)", async () => {
+    const screen = await getScreen(false);
     await screen.getByText("Test Checkbox").click();
     expect(checkMock).toHaveBeenCalledOnce();
   });

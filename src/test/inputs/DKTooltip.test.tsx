@@ -9,7 +9,7 @@ describe("DKTooltip tests", () => {
 
   test("Check initial render", async () => {
     const screen = await getScreen();
-    await screen.getByLabelText("Test Tooltip").hover();
-    expect(screen.getByTestId("question")).toBeVisible();
+    await screen.getByText("?").hover();
+    expect(screen.getByLabelText("Test Tooltip")).toBeVisible();
   });
 });

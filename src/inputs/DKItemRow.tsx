@@ -4,10 +4,12 @@ import type { MouseEventHandler } from "react";
 export const DKItemRow = ({
   name,
   disabled,
+  shouldBePaused,
   onComplete
 }: {
   name: string;
   disabled: boolean;
+  shouldBePaused: boolean;
   onComplete: MouseEventHandler;
 }) => {
   const styles = {
@@ -25,15 +27,19 @@ export const DKItemRow = ({
   return (
     <Grid size={12}>
       <Typography color="textPrimary" variant="h3" sx={styles.text}>
-        <IconButton sx={styles.check} onClick={onComplete} disabled={disabled}>
+        <IconButton
+          sx={styles.check}
+          onClick={onComplete}
+          disabled={disabled || shouldBePaused}
+        >
           ✔
         </IconButton>
         <span
           style={{
             userSelect: "none",
-            cursor: !disabled ? "pointer" : "not-allowed"
+            cursor: !disabled && !shouldBePaused ? "pointer" : "not-allowed"
           }}
-          onClick={!disabled ? onComplete : () => {}}
+          onClick={!disabled && !shouldBePaused ? onComplete : () => {}}
         >
           {name}
         </span>

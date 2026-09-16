@@ -1,6 +1,6 @@
 import { Dialog, DialogContent, DialogTitle, Typography } from "@mui/material";
 import { Dispatch, SetStateAction } from "react";
-import { Puff } from "react-loader-spinner";
+import { Rings } from "react-loader-spinner";
 
 export const DKMessageOnlyDialog = ({
   open,
@@ -18,10 +18,11 @@ export const DKMessageOnlyDialog = ({
     <DialogContent>
       <Typography color="textPrimary" variant="h3">
         {message}
-        <Puff
+        <Rings
           visible
           color="#F00"
           wrapperStyle={{
+            justifyContent: "center",
             padding: "1rem"
           }}
         />
