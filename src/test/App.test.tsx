@@ -31,12 +31,16 @@ describe("App tests", () => {
   });
 
   test("Start DKB game", async () => {
+    expect(screen.getByText("A seed is required!")).toBeVisible();
+    await userEvent.type(screen.getByText("Seed *").first(), "testseed");
     await screen.getByText("Get 43 bananas").click();
     expect(screen.getByText("Waiting")).toBeVisible();
   });
 
   test("Start DK64 game", async () => {
     await screen.getByRole("tab").last().click();
+    expect(screen.getByText("A seed is required!")).toBeVisible();
+    await userEvent.type(screen.getByText("Seed *").first(), "testseed");
     await screen.getByText("Get 370 items").click();
     expect(screen.getByText("Waiting")).toBeVisible();
   });

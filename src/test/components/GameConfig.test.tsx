@@ -33,9 +33,8 @@ describe("GameConfig tests", () => {
       await screen.getByText("5").click();
       await selects[3].click(); // Total
       await screen.getByText("20").click();
-      await userEvent.type(screen.getByText("Seed").first(), "12345");
+      await userEvent.type(screen.getByText("Seed *").first(), "12345");
       await screen.getByText("Timer").click();
-      await screen.getByText("Recycle wrong bananas").click();
 
       expect(setOptionsMock).toHaveBeenLastCalledWith(
         expect.objectContaining({
@@ -43,8 +42,6 @@ describe("GameConfig tests", () => {
           dkbTotal: 20,
           dk64Total: 5,
           timer: false,
-          autoRefresh: true,
-          recycle: true,
           seed: "12345"
         })
       );
@@ -56,9 +53,8 @@ describe("GameConfig tests", () => {
       const selects = screen.getByRole("combobox").all();
       await selects[2].click(); // Count
       await screen.getByText("5").click();
-      await screen.getByText("Include Postgame").click();
-      await screen.getByText("Hell Mode").click();
-      await screen.getByText("Auto-refresh").click();
+      await screen.getByText("Include Postgame?").click();
+      await screen.getByText("Hell Mode?").click();
       await selects[0].click(); // Layer
       await screen.getByText(LayerName.Groove).click();
       await selects[1].click(); // Category
@@ -111,7 +107,7 @@ describe("GameConfig tests", () => {
       await screen.getByText("5").click();
       await selects[4].click(); // Total
       await screen.getByText("10").first().click();
-      await userEvent.type(screen.getByText("Seed").first(), "12345");
+      await userEvent.type(screen.getByText("Seed *").first(), "12345");
       await screen.getByText("Timer").click();
 
       expect(setOptionsMock).toHaveBeenLastCalledWith(
@@ -131,7 +127,7 @@ describe("GameConfig tests", () => {
       const selects = screen.getByRole("combobox").all();
       await selects[3].click(); // Count
       await screen.getByText("5").click();
-      await screen.getByText("Hell Mode").click();
+      await screen.getByText("Hell Mode?").click();
       await selects[0].click(); // Level
       await screen.getByText(LevelName.Factory).click();
       await selects[1].click(); // Category
