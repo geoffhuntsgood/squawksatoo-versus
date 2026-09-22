@@ -1,4 +1,3 @@
-import { describe, expect, test } from "vitest";
 import { DKBCategory, LayerName } from "../../enums";
 import {
   getBananasForCategories,

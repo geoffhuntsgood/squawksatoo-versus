@@ -1,4 +1,3 @@
-import { beforeEach, describe, expect, test } from "vitest";
 import { render, RenderResult } from "vitest-browser-react";
 import { userEvent } from "vitest/browser";
 import App from "../App";

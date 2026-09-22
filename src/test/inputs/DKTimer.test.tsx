@@ -1,5 +1,4 @@
 import { useStopwatch } from "react-timer-hook";
-import { describe, expect, test } from "vitest";
 import { render, renderHook } from "vitest-browser-react";
 import { DKTimer } from "../../inputs";
 

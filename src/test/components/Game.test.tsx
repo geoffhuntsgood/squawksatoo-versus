@@ -1,4 +1,3 @@
-import { describe, expect, test, vi } from "vitest";
 import { render } from "vitest-browser-react";
 import type { DK64Item, DKBBanana } from "../../classes";
 import { Game } from "../../components";

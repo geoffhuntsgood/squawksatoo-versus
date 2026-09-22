@@ -1,4 +1,3 @@
-import { describe, expect, test } from "vitest";
 import { DK64Barrel, DK64Category, LevelName } from "../../enums";
 import {
   getCategoriesForLevel,
